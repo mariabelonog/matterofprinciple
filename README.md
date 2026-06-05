@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Matter of Principle
 
-## Getting Started
+## Game Overview
 
-First, run the development server:
+**Matter of Principle** is a browser-based economic simulation game where you step into the role of a team principal for a struggling fictional racing team. With your organization on the brink of financial collapse, you have exactly one season to turn things around.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Each race weekend presents you with decisions: how to allocate your limited budget, which upgrades to prioritize, how to manage staff morale, and when to take calculated risks. Every choice has consequences that ripple through the season — a matter of principle isn't just a phrase, it's the core mechanic.
+
+The game is designed to be played in a single browser session, with no accounts or persistent data required.
+
+---
+
+## For Developers
+
+### Tech Stack
+
+- **Framework:** [Next.js 15](https://nextjs.org/) with the App Router
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS v4
+- **Linting:** ESLint with Next.js config
+- **Deployment:** Vercel (recommended)
+
+### Architecture
+
+```
+/app            — Next.js App Router pages and layouts
+/app/page.tsx   — Landing page (home)
+/public         — Static assets (images, icons)
+/lib            — Shared utilities and game logic helpers
+/data           — Static game data: events, teams, decisions, balance tables
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Game state is managed client-side (React state / context). No backend, no database — the simulation runs entirely in the browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Server components are used for static/layout content. Client components (`"use client"`) are used only where interactivity is required.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+All game data (events, team stats, decision trees) lives in `/lib` or `/data`, never hardcoded inside components.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Running Locally
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# 1. Install dependencies
+npm install
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# 2. Start the development server
+npm run dev
+```
 
-## Deploy on Vercel
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The app hot-reloads on file changes.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Deploying to Vercel
+
+The easiest way to deploy is via the [Vercel Platform](https://vercel.com/new):
+
+1. Push your code to GitHub.
+2. Import the repository on vercel.com.
+3. Vercel auto-detects Next.js — click **Deploy**.
+
+No environment variables are required for the base game (no external APIs or databases).
+
+For CLI deployment:
+
+```bash
+npm i -g vercel
+vercel
+```
+
+---
+
+## Project Goals & Assessment Criteria
+
+This project is developed as part of a second-year university course on web development.
+
+### Goals
+
+- Demonstrate proficiency with a modern React/Next.js stack
+- Implement non-trivial client-side game logic (budget simulation, event branching)
+- Produce a polished, deployable web application
+- Practice clean code organization and component architecture
+
+### Assessment Criteria (expected)
+
+| Criterion | Description |
+|---|---|
+| Functionality | Core game loop works end-to-end for at least one full season |
+| Code quality | Clean, readable TypeScript; components are small and focused |
+| UI/UX | Visually coherent, responsive, accessible |
+| Architecture | Proper separation of concerns; game data not hardcoded in UI |
+| Deployment | Live, publicly accessible Vercel URL |
+| Documentation | README and inline comments where non-obvious |
