@@ -73,13 +73,13 @@ export default function SeasonResult({ onRestart, onNextSeason, result }: Season
             }}
           >
             <span
-              className="text-gray-500 text-[7px] tracking-widest text-center whitespace-pre-line leading-relaxed"
+              className="text-gray-500 text-[15px] tracking-widest text-center whitespace-pre-line leading-relaxed"
               style={{ fontFamily: "var(--font-pixel), monospace" }}
             >
               {stat.label}
             </span>
             <span
-              className="text-white text-[13px]"
+              className="text-white text-[17px]"
               style={{ fontFamily: "var(--font-pixel), monospace" }}
             >
               {stat.value}
@@ -97,7 +97,7 @@ export default function SeasonResult({ onRestart, onNextSeason, result }: Season
           backgroundColor: "#111111",
         }}
       >
-        <p className="text-gray-300 text-[12px] leading-relaxed font-mono text-center">
+        <p className="text-gray-300 text-[16px] leading-relaxed font-mono text-center">
           {result.summary}
         </p>
       </div>
@@ -106,7 +106,7 @@ export default function SeasonResult({ onRestart, onNextSeason, result }: Season
       <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
         <button
           onClick={onRestart}
-          className="px-8 py-4 bg-transparent hover:bg-gray-800 text-gray-300 text-[10px] tracking-widest uppercase transition-colors duration-100 cursor-pointer active:translate-y-[2px]"
+          className="px-8 py-4 bg-transparent hover:bg-gray-800 text-gray-300 text-[14px] tracking-widest uppercase transition-colors duration-100 cursor-pointer active:translate-y-[2px]"
           style={{
             fontFamily: "var(--font-pixel), monospace",
             border: "3px solid #4b5563",
@@ -119,7 +119,7 @@ export default function SeasonResult({ onRestart, onNextSeason, result }: Season
         <button
           onClick={canContinue ? onNextSeason : undefined}
           disabled={!canContinue}
-          className={`px-8 py-4 text-[10px] tracking-widest uppercase transition-colors duration-100 ${
+          className={`px-8 py-4 text-[14px] tracking-widest uppercase transition-colors duration-100 ${
             canContinue
               ? "bg-red-600 hover:bg-red-500 text-white cursor-pointer active:translate-y-[2px]"
               : "bg-gray-800 text-gray-600 cursor-not-allowed"

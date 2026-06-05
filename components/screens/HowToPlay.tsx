@@ -38,7 +38,7 @@ export default function HowToPlay({ onBack }: HowToPlayProps) {
 
       {/* Header */}
       <div
-        className="px-4 py-2 text-amber-400 text-[9px] tracking-widest uppercase"
+        className="px-4 py-2 text-amber-400 text-[17px] tracking-widest uppercase"
         style={{
           fontFamily: "var(--font-pixel), monospace",
           border: "3px solid #f59e0b",
@@ -76,12 +76,12 @@ export default function HowToPlay({ onBack }: HowToPlayProps) {
             </span>
             <div className="flex flex-col gap-1">
               <span
-                className="text-amber-400 text-[9px] tracking-widest"
+                className="text-amber-400 text-[17px] tracking-widest"
                 style={{ fontFamily: "var(--font-pixel), monospace" }}
               >
                 {step.title}
               </span>
-              <p className="text-gray-400 text-[11px] leading-relaxed font-mono">{step.body}</p>
+              <p className="text-gray-400 text-[15px] leading-relaxed font-mono">{step.body}</p>
             </div>
           </div>
         ))}
@@ -90,7 +90,7 @@ export default function HowToPlay({ onBack }: HowToPlayProps) {
       {/* Back button */}
       <button
         onClick={onBack}
-        className="mt-2 px-8 py-4 bg-red-600 hover:bg-red-500 text-white text-[10px] tracking-widest uppercase transition-colors duration-100 cursor-pointer active:translate-y-[2px]"
+        className="mt-2 px-8 py-4 bg-red-600 hover:bg-red-500 text-white text-[14px] tracking-widest uppercase transition-colors duration-100 cursor-pointer active:translate-y-[2px]"
         style={{
           fontFamily: "var(--font-pixel), monospace",
           border: "3px solid #f87171",

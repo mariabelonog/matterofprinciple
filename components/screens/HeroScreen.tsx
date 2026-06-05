@@ -11,7 +11,7 @@ export default function HeroScreen({ onStart, onHowToPlay }: HeroScreenProps) {
 
       {/* Season badge */}
       <div
-        className="px-4 py-2 text-red-400 text-[9px] tracking-widest uppercase"
+        className="px-4 py-2 text-red-400 text-[17px] tracking-widest uppercase"
         style={{
           fontFamily: "var(--font-pixel), monospace",
           border: "3px solid #dc2626",
@@ -69,12 +69,12 @@ export default function HeroScreen({ onStart, onHowToPlay }: HeroScreenProps) {
 
       {/* Flavor text */}
       <p
-        className="text-red-400 text-[10px] leading-loose tracking-wide"
+        className="text-red-400 text-[14px] leading-loose tracking-wide"
         style={{ fontFamily: "var(--font-pixel), monospace" }}
       >
         YOUR TEAM IS IN CRISIS.
       </p>
-      <p className="text-gray-400 text-[9px] leading-relaxed max-w-sm mx-auto tracking-wide font-mono">
+      <p className="text-gray-400 text-[17px] leading-relaxed max-w-sm mx-auto tracking-wide font-mono">
         Vortex Motorsport is on the brink of collapse. A season of boardroom betrayals, sponsor
         withdrawals, and spiraling costs has left you holding the wrench. One season. Every
         decision counts. Prove your principles are worth fighting for.
@@ -84,7 +84,7 @@ export default function HeroScreen({ onStart, onHowToPlay }: HeroScreenProps) {
       <div className="flex flex-col sm:flex-row gap-4 mt-2">
         <button
           onClick={onStart}
-          className="px-8 py-4 bg-red-600 hover:bg-red-500 text-white text-[10px] tracking-widest uppercase transition-colors duration-100 cursor-pointer active:translate-y-[2px]"
+          className="px-8 py-4 bg-red-600 hover:bg-red-500 text-white text-[14px] tracking-widest uppercase transition-colors duration-100 cursor-pointer active:translate-y-[2px]"
           style={{
             fontFamily: "var(--font-pixel), monospace",
             border: "3px solid #f87171",
@@ -96,7 +96,7 @@ export default function HeroScreen({ onStart, onHowToPlay }: HeroScreenProps) {
         </button>
         <button
           onClick={onHowToPlay}
-          className="px-8 py-4 bg-transparent hover:bg-gray-800 text-gray-300 text-[10px] tracking-widest uppercase transition-colors duration-100 cursor-pointer active:translate-y-[2px]"
+          className="px-8 py-4 bg-transparent hover:bg-gray-800 text-gray-300 text-[14px] tracking-widest uppercase transition-colors duration-100 cursor-pointer active:translate-y-[2px]"
           style={{
             fontFamily: "var(--font-pixel), monospace",
             border: "3px solid #4b5563",
@@ -109,7 +109,7 @@ export default function HeroScreen({ onStart, onHowToPlay }: HeroScreenProps) {
       </div>
 
       <p
-        className="text-gray-700 text-[8px] tracking-widest uppercase mt-1"
+        className="text-gray-700 text-[16px] tracking-widest uppercase mt-1"
         style={{ fontFamily: "var(--font-pixel), monospace" }}
       >
         Season 01 · Vortex Motorsport

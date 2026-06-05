@@ -33,13 +33,13 @@ export default function Dashboard({ onCrisisEvent, onEndSeason }: DashboardProps
       {/* Page header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h2
-          className="text-white text-[13px] tracking-widest"
+          className="text-white text-[17px] tracking-widest"
           style={{ fontFamily: "var(--font-pixel), monospace" }}
         >
           DASHBOARD
         </h2>
         <span
-          className="text-red-400 text-[8px] tracking-widest px-3 py-1"
+          className="text-red-400 text-[16px] tracking-widest px-3 py-1"
           style={{
             fontFamily: "var(--font-pixel), monospace",
             border: "3px solid #dc2626",
@@ -64,7 +64,7 @@ export default function Dashboard({ onCrisisEvent, onEndSeason }: DashboardProps
           }}
         >
           <h3
-            className="text-amber-400 text-[9px] tracking-widest mb-1"
+            className="text-amber-400 text-[17px] tracking-widest mb-1"
             style={{ fontFamily: "var(--font-pixel), monospace" }}
           >
             ■ TEAM STATUS
@@ -73,7 +73,7 @@ export default function Dashboard({ onCrisisEvent, onEndSeason }: DashboardProps
           {/* Budget — shown as large currency figure */}
           <div className="flex items-center justify-between py-2 border-b border-gray-800">
             <span
-              className="text-gray-400 text-[8px] tracking-widest"
+              className="text-gray-400 text-[16px] tracking-widest"
               style={{ fontFamily: "var(--font-pixel), monospace" }}
             >
               BUDGET
@@ -101,13 +101,13 @@ export default function Dashboard({ onCrisisEvent, onEndSeason }: DashboardProps
               <div key={stat.label} className="flex flex-col gap-1">
                 <div className="flex justify-between items-center">
                   <span
-                    className="text-gray-400 text-[7px] tracking-widest"
+                    className="text-gray-400 text-[15px] tracking-widest"
                     style={{ fontFamily: "var(--font-pixel), monospace" }}
                   >
                     {stat.label}
                   </span>
                   <span
-                    className="text-[8px]"
+                    className="text-[16px]"
                     style={{ fontFamily: "var(--font-pixel), monospace", color }}
                   >
                     {stat.value}
@@ -135,7 +135,7 @@ export default function Dashboard({ onCrisisEvent, onEndSeason }: DashboardProps
           }}
         >
           <h3
-            className="text-amber-400 text-[9px] tracking-widest mb-1"
+            className="text-amber-400 text-[17px] tracking-widest mb-1"
             style={{ fontFamily: "var(--font-pixel), monospace" }}
           >
             ■ BUDGET ALLOCATION
@@ -145,13 +145,13 @@ export default function Dashboard({ onCrisisEvent, onEndSeason }: DashboardProps
             <div key={cat.id} className="flex flex-col gap-1">
               <div className="flex justify-between items-center">
                 <span
-                  className="text-[7px] tracking-widest"
+                  className="text-[15px] tracking-widest"
                   style={{ fontFamily: "var(--font-pixel), monospace", color: cat.color }}
                 >
                   {cat.label.toUpperCase()}
                 </span>
                 <span
-                  className="text-gray-300 text-[8px]"
+                  className="text-gray-300 text-[16px]"
                   style={{ fontFamily: "var(--font-pixel), monospace" }}
                 >
                   {cat.allocated}%
@@ -164,7 +164,7 @@ export default function Dashboard({ onCrisisEvent, onEndSeason }: DashboardProps
                   style={{ width: `${cat.allocated}%`, backgroundColor: cat.color }}
                 />
               </div>
-              <p className="text-gray-600 text-[10px] font-mono leading-snug">{cat.description}</p>
+              <p className="text-gray-600 text-[14px] font-mono leading-snug">{cat.description}</p>
             </div>
           ))}
 
@@ -173,13 +173,13 @@ export default function Dashboard({ onCrisisEvent, onEndSeason }: DashboardProps
             className="flex justify-between items-center mt-2 pt-3 border-t border-gray-700"
           >
             <span
-              className="text-gray-400 text-[7px] tracking-widest"
+              className="text-gray-400 text-[15px] tracking-widest"
               style={{ fontFamily: "var(--font-pixel), monospace" }}
             >
               TOTAL ALLOCATED
             </span>
             <span
-              className={`text-[9px] ${totalAllocated === 100 ? "text-green-400" : "text-red-400"}`}
+              className={`text-[17px] ${totalAllocated === 100 ? "text-green-400" : "text-red-400"}`}
               style={{ fontFamily: "var(--font-pixel), monospace" }}
             >
               {totalAllocated}%
@@ -198,7 +198,7 @@ export default function Dashboard({ onCrisisEvent, onEndSeason }: DashboardProps
         }}
       >
         <h3
-          className="text-amber-400 text-[8px] tracking-widest mb-3"
+          className="text-amber-400 text-[16px] tracking-widest mb-3"
           style={{ fontFamily: "var(--font-pixel), monospace" }}
         >
           ■ RACE CALENDAR
@@ -224,22 +224,22 @@ export default function Dashboard({ onCrisisEvent, onEndSeason }: DashboardProps
                 }}
               >
                 <span
-                  className="text-[7px]"
+                  className="text-[15px]"
                   style={{ fontFamily: "var(--font-pixel), monospace", color: textColor }}
                 >
                   R{race.round}
                 </span>
                 <span
-                  className="text-[6px] text-center leading-tight font-mono"
+                  className="text-[14px] text-center leading-tight font-mono"
                   style={{ color: textColor }}
                 >
                   {race.location}
                 </span>
                 {isCompleted && (
-                  <span className="text-green-500 text-[8px]">✓</span>
+                  <span className="text-green-500 text-[16px]">✓</span>
                 )}
                 {isNext && (
-                  <span className="text-red-400 text-[8px]">▶</span>
+                  <span className="text-red-400 text-[16px]">▶</span>
                 )}
               </div>
             );
@@ -251,7 +251,7 @@ export default function Dashboard({ onCrisisEvent, onEndSeason }: DashboardProps
       <div className="flex flex-col sm:flex-row gap-4 justify-end">
         <button
           onClick={onCrisisEvent}
-          className="px-6 py-4 text-amber-400 hover:bg-amber-950 text-[10px] tracking-widest uppercase transition-colors duration-100 cursor-pointer active:translate-y-[2px]"
+          className="px-6 py-4 text-amber-400 hover:bg-amber-950 text-[14px] tracking-widest uppercase transition-colors duration-100 cursor-pointer active:translate-y-[2px]"
           style={{
             fontFamily: "var(--font-pixel), monospace",
             border: "3px solid #f59e0b",
@@ -264,7 +264,7 @@ export default function Dashboard({ onCrisisEvent, onEndSeason }: DashboardProps
         </button>
         <button
           onClick={onEndSeason}
-          className="px-6 py-4 bg-red-600 hover:bg-red-500 text-white text-[10px] tracking-widest uppercase transition-colors duration-100 cursor-pointer active:translate-y-[2px]"
+          className="px-6 py-4 bg-red-600 hover:bg-red-500 text-white text-[14px] tracking-widest uppercase transition-colors duration-100 cursor-pointer active:translate-y-[2px]"
           style={{
             fontFamily: "var(--font-pixel), monospace",
             border: "3px solid #f87171",

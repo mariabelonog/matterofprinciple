@@ -12,7 +12,7 @@ export default function CrisisCard({ onChoice }: CrisisCardProps) {
 
       {/* Crisis badge */}
       <div
-        className="px-4 py-2 text-red-400 text-[10px] tracking-widest uppercase"
+        className="px-4 py-2 text-red-400 text-[14px] tracking-widest uppercase"
         style={{
           fontFamily: "var(--font-pixel), monospace",
           border: "3px solid #dc2626",
@@ -32,7 +32,7 @@ export default function CrisisCard({ onChoice }: CrisisCardProps) {
       </h2>
 
       {/* Event description */}
-      <p className="text-gray-300 text-[12px] leading-relaxed font-mono text-center max-w-lg">
+      <p className="text-gray-300 text-[16px] leading-relaxed font-mono text-center max-w-lg">
         {crisisEvent.description}
       </p>
 
@@ -61,14 +61,14 @@ export default function CrisisCard({ onChoice }: CrisisCardProps) {
             type="button"
           >
             <span
-              className="text-amber-400 text-[9px] tracking-widest"
+              className="text-amber-400 text-[17px] tracking-widest"
               style={{ fontFamily: "var(--font-pixel), monospace" }}
             >
               {choice.label.toUpperCase()}
             </span>
-            <p className="text-gray-400 text-[11px] font-mono leading-relaxed">{choice.description}</p>
+            <p className="text-gray-400 text-[15px] font-mono leading-relaxed">{choice.description}</p>
             <span
-              className="text-gray-500 text-[8px] tracking-wide font-mono"
+              className="text-gray-500 text-[16px] tracking-wide font-mono"
             >
               {choice.consequence}
             </span>
