@@ -28,7 +28,7 @@ export default function CrisisCard({ onChoice }: CrisisCardProps) {
         className="text-red-500 text-center leading-snug"
         style={{ fontFamily: "var(--font-pixel), monospace", fontSize: "clamp(0.75rem, 3vw, 1.1rem)" }}
       >
-        {crisisEvent.title}
+        ⚠ {crisisEvent.city.toUpperCase()} CRISIS
       </h2>
 
       {/* Event description */}
@@ -68,9 +68,13 @@ export default function CrisisCard({ onChoice }: CrisisCardProps) {
             </span>
             <p className="text-gray-400 text-[15px] font-mono leading-relaxed">{choice.description}</p>
             <span
-              className="text-gray-500 text-[16px] tracking-wide font-mono"
+              className="text-gray-500 text-[14px] tracking-wide font-mono"
             >
-              {choice.consequence}
+              {[
+                choice.budgetDelta !== 0 ? `budget ${choice.budgetDelta > 0 ? "+" : ""}${(choice.budgetDelta / 1_000_000).toFixed(0)}M G` : null,
+                choice.staffQualityDelta !== 0 ? `staff ${choice.staffQualityDelta > 0 ? "+" : ""}${choice.staffQualityDelta} quality` : null,
+                choice.publicImageDelta !== 0 ? `image ${choice.publicImageDelta > 0 ? "+" : ""}${choice.publicImageDelta}` : null,
+              ].filter(Boolean).join(" · ")}
             </span>
           </button>
         ))}

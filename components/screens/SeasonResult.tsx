@@ -8,14 +8,15 @@ interface SeasonResultProps {
   result: typeof seasonResult;
 }
 
-function formatBudget(n: number): string {
-  return "$" + n.toLocaleString("en-US");
+function formatG(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M G";
+  return n.toLocaleString("en-US") + " G";
 }
 
 export default function SeasonResult({ onRestart, onNextSeason, result }: SeasonResultProps) {
   const isSurvived = result.outcome === "survived";
   const isBankrupt = result.outcome === "bankrupt";
-  const isAcquired = result.outcome === "acquired";
+  const isAcquired = false;
 
   const outcomeLabel = isSurvived
     ? "SEASON SURVIVED"
@@ -30,10 +31,10 @@ export default function SeasonResult({ onRestart, onNextSeason, result }: Season
   const canContinue = isSurvived;
 
   const recapStats = [
-    { label: "RACES\nCOMPLETED", value: String(result.stats.racesCompleted) },
-    { label: "TOTAL\nPOINTS", value: String(result.stats.points) },
-    { label: "BUDGET\nREMAINING", value: formatBudget(result.stats.budgetRemaining) },
-    { label: "FINAL\nMORALE", value: String(result.stats.moraleFinal) },
+    { label: "RACES\nCOMPLETED",  value: String(result.stats.racesCompleted) },
+    { label: "AVG\nPOSITION",    value: String(result.stats.avgPosition) },
+    { label: "BUDGET\nREMAINING", value: formatG(result.stats.budgetRemaining) },
+    { label: "PUBLIC\nIMAGE",    value: String(result.stats.publicImageFinal) },
   ];
 
   return (
