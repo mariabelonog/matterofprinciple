@@ -33,7 +33,7 @@ export default function TeamSetup({ onConfirm }: TeamSetupProps) {
   }
 
   return (
-    <div className="relative z-20 px-6 max-w-xl mx-auto flex flex-col items-center gap-8 py-20 w-full">
+    <div className="relative z-20 px-6 max-w-xl mx-auto flex flex-col items-center gap-8 py-16 w-full">
 
       {/* Header badge */}
       <div
@@ -46,6 +46,20 @@ export default function TeamSetup({ onConfirm }: TeamSetupProps) {
         }}
       >
         ▶ SEASON SETUP
+      </div>
+
+      {/* Story intro */}
+      <div
+        className="w-full p-5"
+        style={{
+          border: "3px solid #78350f",
+          boxShadow: "4px 4px 0px #1c1000",
+          backgroundColor: "#1c1000",
+        }}
+      >
+        <p className="text-amber-300 text-[14px] font-mono leading-relaxed">
+          You have been appointed as the new team principal of a struggling racing team. The board gives you 100M G and one season to stabilize the team.
+        </p>
       </div>
 
       {/* Title */}
@@ -128,7 +142,7 @@ export default function TeamSetup({ onConfirm }: TeamSetupProps) {
         }}
         type="button"
       >
-        ▶ CONFIRM NAME
+        ▶ CONTINUE TO DRIVER SELECTION →
       </button>
 
       {/* Starting budget reminder */}

@@ -175,17 +175,9 @@ export default function Dashboard({ teamName, onCrisisEvent, onEndSeason }: Dash
           </h3>
 
           {/* Derived indices */}
-          {(
-            [
-              { label: "CAR PERFORMANCE", value: carPerformance },
-              { label: "STRATEGY",        value: strategy },
-              { label: "DRIVER INPUT",    value: driverInput },
-            ] as Array<{ label: string; value: number }>
-          ).map(({ label, value }, i) => (
-            <div key={i}>
-              <IndexBar label={label} value={parseFloat(value.toFixed(1))} />
-            </div>
-          ))}
+          <IndexBar label="CAR PERFORMANCE" value={parseFloat(carPerformance.toFixed(1))} />
+          <IndexBar label="STRATEGY" value={parseFloat(strategy.toFixed(1))} />
+          <IndexBar label="DRIVER INPUT" value={parseFloat(driverInput.toFixed(1))} />
 
           {/* Race score — prominent */}
           <div
