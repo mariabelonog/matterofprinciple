@@ -52,7 +52,17 @@ export function calcPosition(playerScore: number, opponentScores: number[]): num
   return opponentScores.filter((s) => s > playerScore).length + 1;
 }
 
-// Investment formula per spec: index += investment / divisor, capped at 10
+// Divisors (in G) for each investment category.
+// 10M G = 1 index point for car/staff; 12M G = 1 index point for public image.
+// These are intentionally generous so the index bars show visible movement
+// within a realistic pre-season budget.
+export const INVESTMENT_DIVISORS = {
+  carDevelopment: 10_000_000,
+  staffQuality:   10_000_000,
+  publicImage:    12_000_000,
+} as const;
+
+// Investment formula: index += investment / divisor, capped at 10
 export function applyInvestment(current: number, investmentG: number, divisor: number): number {
   return Math.min(10, current + investmentG / divisor);
 }

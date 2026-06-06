@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { BudgetAllocation } from "@/src/types/game";
-import { applyInvestment } from "@/src/lib/simulation";
+import { applyInvestment, INVESTMENT_DIVISORS } from "@/src/lib/simulation";
 
 interface Props {
   budget: number;
@@ -13,20 +13,42 @@ function formatG(n: number): string {
   return (n / 1_000_000).toFixed(1) + "M G";
 }
 
+// Parse a string input to a non-negative integer (empty → 0)
+function parseM(s: string): number {
+  const n = parseInt(s.replace(/\D/g, ""), 10);
+  return isNaN(n) ? 0 : n;
+}
+
 interface AllocInputProps {
   label: string;
   description: string;
   formula: string;
-  valueM: number;
-  onChange: (v: number) => void;
+  raw: string; // raw string state for the input
+  onRawChange: (v: string) => void;
   currentIndex: number;
   newIndex: number;
   maxM: number;
 }
 
-function AllocInput({ label, description, formula, valueM, onChange, currentIndex, newIndex, maxM }: AllocInputProps) {
+function AllocInput({
+  label,
+  description,
+  formula,
+  raw,
+  onRawChange,
+  currentIndex,
+  newIndex,
+  maxM,
+}: AllocInputProps) {
   const indexColor = newIndex >= 7 ? "#22c55e" : newIndex >= 4 ? "#f59e0b" : "#dc2626";
   const pct = (newIndex / 10) * 100;
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    // Strip non-digits, then drop leading zeros
+    const digits = e.target.value.replace(/\D/g, "");
+    const clean = digits === "" ? "" : String(parseInt(digits, 10));
+    onRawChange(clean);
+  }
 
   return (
     <div
@@ -51,12 +73,11 @@ function AllocInput({ label, description, formula, valueM, onChange, currentInde
 
       <div className="flex items-center gap-3">
         <input
-          type="number"
-          min={0}
-          max={maxM}
-          step={1}
-          value={valueM}
-          onChange={(e) => onChange(Math.max(0, Number(e.target.value)))}
+          type="text"
+          inputMode="numeric"
+          value={raw}
+          placeholder="0"
+          onChange={handleChange}
           className="w-28 bg-[#0a0a0a] text-white text-[15px] font-mono px-3 py-2 outline-none"
           style={{
             border: "3px solid #4b5563",
@@ -64,9 +85,12 @@ function AllocInput({ label, description, formula, valueM, onChange, currentInde
           }}
         />
         <span className="text-gray-400 text-[13px] font-mono">M G</span>
+        <span className="text-gray-600 text-[13px] font-mono">
+          (max {maxM.toFixed(0)}M G)
+        </span>
       </div>
 
-      {/* Index bar showing result */}
+      {/* Index bar showing projected result */}
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between">
           <span className="text-[12px] font-mono text-gray-600">INDEX</span>
@@ -75,7 +99,14 @@ function AllocInput({ label, description, formula, valueM, onChange, currentInde
           </span>
         </div>
         <div className="w-full h-2 bg-[#1a1a1a]" style={{ border: "1px solid #333" }}>
-          <div style={{ width: `${pct}%`, backgroundColor: indexColor, height: "100%", transition: "width 0.2s" }} />
+          <div
+            style={{
+              width: `${pct}%`,
+              backgroundColor: indexColor,
+              height: "100%",
+              transition: "width 0.2s",
+            }}
+          />
         </div>
       </div>
     </div>
@@ -83,26 +114,30 @@ function AllocInput({ label, description, formula, valueM, onChange, currentInde
 }
 
 export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
-  const [carDevM, setCarDevM] = useState(0);
-  const [staffM, setStaffM] = useState(0);
-  const [imageM, setImageM] = useState(0);
+  const [carDevRaw, setCarDevRaw] = useState("");
+  const [staffRaw, setStaffRaw] = useState("");
+  const [imageRaw, setImageRaw] = useState("");
+
+  const carDevM = parseM(carDevRaw);
+  const staffM = parseM(staffRaw);
+  const imageM = parseM(imageRaw);
 
   const totalAllocatedM = carDevM + staffM + imageM;
   const budgetM = budget / 1_000_000;
   const remainingM = budgetM - totalAllocatedM;
   const isOverspending = totalAllocatedM > budgetM;
 
-  // Preview projected indices (starting from 0 since investments happen after driver selection)
-  const newCarDev = applyInvestment(0, carDevM * 1_000_000, 20_000_000);
-  const newStaff = applyInvestment(0, staffM * 1_000_000, 20_000_000);
-  const newImage = applyInvestment(0, imageM * 1_000_000, 25_000_000);
+  // Preview projected indices using the shared divisors
+  const newCarDev = applyInvestment(0, carDevM * 1_000_000, INVESTMENT_DIVISORS.carDevelopment);
+  const newStaff  = applyInvestment(0, staffM  * 1_000_000, INVESTMENT_DIVISORS.staffQuality);
+  const newImage  = applyInvestment(0, imageM  * 1_000_000, INVESTMENT_DIVISORS.publicImage);
 
   function handleConfirm() {
     if (isOverspending) return;
     onConfirm({
       carDevelopment: carDevM * 1_000_000,
-      staffQuality: staffM * 1_000_000,
-      publicImage: imageM * 1_000_000,
+      staffQuality:   staffM  * 1_000_000,
+      publicImage:    imageM  * 1_000_000,
     });
   }
 
@@ -162,9 +197,9 @@ export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
       <AllocInput
         label="CAR DEVELOPMENT"
         description="Improves car performance on track. Boosts carPerformance score directly."
-        formula="index += investment ÷ 20M"
-        valueM={carDevM}
-        onChange={setCarDevM}
+        formula="index += investment ÷ 10M"
+        raw={carDevRaw}
+        onRawChange={setCarDevRaw}
         currentIndex={0}
         newIndex={newCarDev}
         maxM={budgetM}
@@ -173,9 +208,9 @@ export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
       <AllocInput
         label="STAFF QUALITY"
         description="Better engineers and strategists improve both car performance and race strategy."
-        formula="index += investment ÷ 20M"
-        valueM={staffM}
-        onChange={setStaffM}
+        formula="index += investment ÷ 10M"
+        raw={staffRaw}
+        onRawChange={setStaffRaw}
         currentIndex={0}
         newIndex={newStaff}
         maxM={budgetM}
@@ -184,9 +219,9 @@ export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
       <AllocInput
         label="PUBLIC IMAGE"
         description="Increases chance of sponsor contracts and board confidence."
-        formula="index += investment ÷ 25M"
-        valueM={imageM}
-        onChange={setImageM}
+        formula="index += investment ÷ 12M"
+        raw={imageRaw}
+        onRawChange={setImageRaw}
         currentIndex={0}
         newIndex={newImage}
         maxM={budgetM}

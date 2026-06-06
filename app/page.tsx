@@ -11,7 +11,7 @@ import Dashboard from "@/components/screens/Dashboard";
 import CrisisCard from "@/components/screens/CrisisCard";
 import SeasonResult from "@/components/screens/SeasonResult";
 import { seasonResult } from "@/data/mockData";
-import { applyInvestment } from "@/src/lib/simulation";
+import { applyInvestment, INVESTMENT_DIVISORS } from "@/src/lib/simulation";
 import type { GameState, Driver, BudgetAllocation } from "@/src/types/game";
 
 type Screen =
@@ -60,9 +60,9 @@ export default function Home() {
   function handleBudgetConfirm(alloc: BudgetAllocation) {
     const totalInvested = alloc.carDevelopment + alloc.staffQuality + alloc.publicImage;
     patchState({
-      carDevelopment: applyInvestment(gameState.carDevelopment, alloc.carDevelopment, 20_000_000),
-      staffQuality: applyInvestment(gameState.staffQuality, alloc.staffQuality, 20_000_000),
-      publicImage: applyInvestment(gameState.publicImage, alloc.publicImage, 25_000_000),
+      carDevelopment: applyInvestment(gameState.carDevelopment, alloc.carDevelopment, INVESTMENT_DIVISORS.carDevelopment),
+      staffQuality: applyInvestment(gameState.staffQuality, alloc.staffQuality, INVESTMENT_DIVISORS.staffQuality),
+      publicImage: applyInvestment(gameState.publicImage, alloc.publicImage, INVESTMENT_DIVISORS.publicImage),
       budget: gameState.budget - totalInvested,
     });
     setCurrentScreen("parisrace");
