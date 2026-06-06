@@ -3,15 +3,22 @@
 import { useState } from "react";
 import HeroScreen from "@/components/screens/HeroScreen";
 import HowToPlay from "@/components/screens/HowToPlay";
+import TeamSetup from "@/components/screens/TeamSetup";
 import Dashboard from "@/components/screens/Dashboard";
 import CrisisCard from "@/components/screens/CrisisCard";
 import SeasonResult from "@/components/screens/SeasonResult";
 import { seasonResult } from "@/data/mockData";
 
-type Screen = "hero" | "howtoplay" | "dashboard" | "crisis" | "result";
+type Screen = "hero" | "howtoplay" | "teamsetup" | "dashboard" | "crisis" | "result";
 
 export default function Home() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("hero");
+  const [teamName, setTeamName] = useState("Vortex Motorsport");
+
+  function handleTeamConfirm(name: string) {
+    setTeamName(name);
+    setCurrentScreen("dashboard");
+  }
 
   return (
     <main
@@ -62,7 +69,7 @@ export default function Home() {
       <div className="w-full pt-4 pb-6 flex flex-col items-center">
         {currentScreen === "hero" && (
           <HeroScreen
-            onStart={() => setCurrentScreen("dashboard")}
+            onStart={() => setCurrentScreen("teamsetup")}
             onHowToPlay={() => setCurrentScreen("howtoplay")}
           />
         )}
@@ -71,8 +78,13 @@ export default function Home() {
           <HowToPlay onBack={() => setCurrentScreen("hero")} />
         )}
 
+        {currentScreen === "teamsetup" && (
+          <TeamSetup onConfirm={handleTeamConfirm} />
+        )}
+
         {currentScreen === "dashboard" && (
           <Dashboard
+            teamName={teamName}
             onCrisisEvent={() => setCurrentScreen("crisis")}
             onEndSeason={() => setCurrentScreen("result")}
           />

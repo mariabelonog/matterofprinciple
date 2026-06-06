@@ -1,98 +1,75 @@
 // Static mock data for Matter of Principle — all values are fictional.
-// Vortex Motorsport is a fictional racing team; no real F1 entities are referenced.
+// No real F1 teams, drivers, circuits, or entities are referenced.
 
-export const teamStats = {
-  budget: 4_200_000,         // remaining budget in fictional currency
-  carPerformance: 42,        // 0–100
-  driverMorale: 61,          // 0–100
-  staffQuality: 55,          // 0–100
-  reputation: 38,            // 0–100
-  risk: 74,                  // 0–100 (higher = worse)
+// Indices: all bounded 0–10 per game spec.
+export const teamState = {
+  teamName: "Vortex Motorsport",
+  budget: 82_000_000,          // in Geld (G); starts at 100M
+  carDevelopment: 4.0,         // 0–10
+  staffQuality: 3.5,           // 0–10
+  publicImage: 5.0,            // 0–10
+  driverIndex: 7.0,            // 0–10 — fixed at driver selection
+  riskWillingness: 6,          // 0–10 — chosen before each race
+  currentRace: 2,              // 1–8
 };
 
-export const budgetCategories = [
-  {
-    id: "car_dev",
-    label: "Car Development",
-    allocated: 35,
-    color: "#dc2626",
-    description: "Wind tunnel time, CFD simulations, component fabrication.",
-  },
-  {
-    id: "driver_contracts",
-    label: "Driver Contracts",
-    allocated: 25,
-    color: "#f59e0b",
-    description: "Primary and reserve driver retainers and bonuses.",
-  },
-  {
-    id: "staff_engineering",
-    label: "Staff & Engineering",
-    allocated: 20,
-    color: "#3b82f6",
-    description: "Mechanics, strategists, data engineers, and pit crew.",
-  },
-  {
-    id: "marketing_sponsors",
-    label: "Marketing & Sponsors",
-    allocated: 12,
-    color: "#8b5cf6",
-    description: "Hospitality suites, livery deals, and media commitments.",
-  },
-  {
-    id: "crisis_reserve",
-    label: "Crisis Reserve",
-    allocated: 8,
-    color: "#22c55e",
-    description: "Emergency fund for unexpected setbacks mid-season.",
-  },
+export const drivers = [
+  { name: "Lev Cassian",   driverIndex: 9.0, cost: 15_000_000 },
+  { name: "Mira Solande",  driverIndex: 6.5, cost:  8_000_000 },
+  { name: "Otto Vael",     driverIndex: 5.0, cost:  4_000_000 },
+];
+
+export const raceCalendar = [
+  { round: 1, city: "Paris",      isCrisis: false },
+  { round: 2, city: "Strassburg", isCrisis: true  },
+  { round: 3, city: "Stuttgart",  isCrisis: false },
+  { round: 4, city: "Vienna",     isCrisis: false },
+  { round: 5, city: "Budapest",   isCrisis: true  },
+  { round: 6, city: "Bucharest",  isCrisis: false },
+  { round: 7, city: "Sinaia",     isCrisis: false },
+  { round: 8, city: "Istanbul",   isCrisis: true  },
 ];
 
 export const crisisEvent = {
-  title: "KEY ENGINEER POACHED",
+  city: "Strassburg",
   description:
-    "Vortex Motorsport's lead aerodynamicist, Dr. Rael Vance, has accepted a lucrative offer from a rival outfit. The rest of the aero department is rattled. You have 48 hours to decide how to respond before the story breaks in the press.",
+    "Your lead engineer threatens to walk after a heated dispute over technical direction. The rest of the department is watching. You have hours to decide.",
   choices: [
     {
-      id: "match_offer",
-      label: "Match the Offer",
-      description: "Renegotiate Vance's contract at 40% above current rate to keep him in-house.",
-      consequence: "−$800k budget · +12 Staff Quality · −5 Risk",
+      id: "pay_bonus",
+      label: "Pay a retention bonus",
+      description: "Lock them in with a 5M G one-time payment.",
+      budgetDelta: -5_000_000,
+      staffQualityDelta: 1,
+      publicImageDelta: 0,
     },
     {
-      id: "promote_internal",
-      label: "Promote from Within",
-      description: "Elevate junior aerodynamicist Sable Drex to lead role immediately.",
-      consequence: "+10 Driver Morale · −8 Car Performance (short term) · +4 Risk",
+      id: "promote",
+      label: "Promote from within",
+      description: "Elevate a junior engineer and absorb the disruption.",
+      budgetDelta: 0,
+      staffQualityDelta: -0.5,
+      publicImageDelta: 0.5,
     },
     {
-      id: "ride_it_out",
-      label: "Let Him Go & Restructure",
-      description: "Accept the departure, redistribute responsibilities, and cut costs elsewhere.",
-      consequence: "−15 Reputation · −6 Staff Quality · +$200k budget",
+      id: "ignore",
+      label: "Let them go",
+      description: "Restructure quietly and cut costs elsewhere.",
+      budgetDelta: 0,
+      staffQualityDelta: -1.5,
+      publicImageDelta: -0.5,
     },
   ],
 };
 
 export const seasonResult = {
-  outcome: "survived" as "survived" | "bankrupt" | "acquired",
+  outcome: "survived" as "survived" | "bankrupt",
   summary:
-    "Against all odds, Vortex Motorsport crossed the finish line. The season was turbulent — two driver controversies, a mid-year sponsor pullout, and a gearbox scandal — but disciplined budget management and a bold mid-season car upgrade kept the team alive. You've earned a second chance.",
+    "Against all odds, your team crossed the finish line. Disciplined investment and two fortunate sponsor payouts kept the budget alive through Istanbul. A season survived is a foundation built.",
   stats: {
     racesCompleted: 8,
-    points: 47,
-    budgetRemaining: 1_150_000,
-    moraleFinal: 68,
+    avgPosition: 4,
+    budgetRemaining: 11_500_000,
+    publicImageFinal: 6.5,
   },
 };
-
-export const mockRaceCalendar = [
-  { round: 1, name: "Grand Prix of Solara", location: "Solara City", status: "completed" as const },
-  { round: 2, name: "Ironveil Classic", location: "Ironveil", status: "completed" as const },
-  { round: 3, name: "Duskport Sprint", location: "Duskport", status: "completed" as const },
-  { round: 4, name: "Verano Enduro", location: "Verano", status: "completed" as const },
-  { round: 5, name: "Nordpass Challenge", location: "Nordpass", status: "next" as const },
-  { round: 6, name: "Copper Canyon Race", location: "Copper Canyon", status: "upcoming" as const },
-  { round: 7, name: "Halcyon 400", location: "Halcyon", status: "upcoming" as const },
-  { round: 8, name: "Terminus Grand Prix", location: "Terminus", status: "upcoming" as const },
-];

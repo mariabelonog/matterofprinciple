@@ -7,28 +7,38 @@ interface HowToPlayProps {
 const steps = [
   {
     num: "01",
-    title: "REVIEW YOUR TEAM",
-    body: "Start each season by assessing your budget, car performance, driver morale, staff quality, reputation, and risk level on the Dashboard.",
+    title: "NAME YOUR TEAM & PICK A DRIVER",
+    body: "You start with 100M G (Geld). First, name your team. Then choose one of three drivers — each has a skill index (0–10) and a cost deducted immediately from your budget.",
   },
   {
     num: "02",
-    title: "ALLOCATE YOUR BUDGET",
-    body: "Decide how to split resources between car development, driver contracts, staff, marketing, and a crisis reserve. Every allocation is a trade-off.",
+    title: "INVEST BEFORE EACH RACE",
+    body: "Allocate Geld into car development, staff quality, and public image. Car dev and staff grow their indices by investment ÷ 20 (capped at 10). Public image grows by investment ÷ 25 — but your risk choice erodes it by 0.05 per risk point each race.",
   },
   {
     num: "03",
-    title: "FACE CRISIS EVENTS",
-    body: "Mid-season, unexpected crises will strike. Each event presents three choices with different financial and morale consequences. There is no perfect answer.",
+    title: "SET YOUR RISK WILLINGNESS",
+    body: "Before each race, choose a risk level (0–10). Higher risk boosts your strategy and driver performance, but raises crash probability and slowly damages your public image.",
   },
   {
     num: "04",
     title: "RACE THE CALENDAR",
-    body: "Progress through 8 fictional race rounds. Your choices shape your performance — neglect car development and your points suffer; burn your reserves and you go under.",
+    body: "8 races across Paris, Strassburg, Stuttgart, Vienna, Budapest, Bucharest, Sinaia, and Istanbul. Your race score is calculated from car performance, driver skill, and strategy — then ranked against 9 CPU opponents to determine your finishing position.",
   },
   {
     num: "05",
+    title: "MANAGE CRASHES & SPONSORS",
+    body: "Each race: a sponsor contract may pay out (publicImage ÷ 10 chance, worth publicImage × 3M G). A crash may destroy equipment (chance = riskWillingness ÷ 20; loss tied to your last two car investments). Budget < 0 means game over.",
+  },
+  {
+    num: "06",
+    title: "SURVIVE CRISIS EVENTS",
+    body: "Races at Strassburg, Budapest, and Istanbul include a crisis event with three choices. Each choice shifts your budget, indices, or risk — applied before that race's calculation. There is no safe pick.",
+  },
+  {
+    num: "07",
     title: "SURVIVE THE SEASON",
-    body: "Reach the end without going bankrupt or being acquired. A season survived is a victory. A second season is an opportunity to build something lasting.",
+    body: "Reach Istanbul without going bankrupt. Your final score is based on average race position, remaining budget, and public image. Survival is the win — your ranking is the legacy.",
   },
 ];
 
@@ -85,6 +95,29 @@ export default function HowToPlay({ onBack }: HowToPlayProps) {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Indices reference box */}
+      <div
+        className="w-full p-4 flex flex-col gap-2"
+        style={{
+          border: "3px solid #dc2626",
+          boxShadow: "4px 4px 0px #7f1d1d",
+          backgroundColor: "#1c0a0a",
+        }}
+      >
+        <span
+          className="text-red-400 text-[16px] tracking-widest mb-1"
+          style={{ fontFamily: "var(--font-pixel), monospace" }}
+        >
+          ■ KEY FORMULAS
+        </span>
+        <p className="text-gray-400 text-[14px] font-mono leading-loose">
+          carPerformance = carDev × 0.6 + staffQuality × 0.4<br />
+          strategy = staffQuality × 0.7 + riskWillingness × 0.3<br />
+          driverInput = driverIndex × 0.6 + riskWillingness × 0.4<br />
+          raceScore = carPerf × 0.6 + driverInput × 0.1 + strategy × 0.3
+        </p>
       </div>
 
       {/* Back button */}
