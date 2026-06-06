@@ -180,9 +180,11 @@ export default function Dashboard({ teamName, onCrisisEvent, onEndSeason }: Dash
               { label: "CAR PERFORMANCE", value: carPerformance },
               { label: "STRATEGY",        value: strategy },
               { label: "DRIVER INPUT",    value: driverInput },
-            ] as { label: string; value: number }[]
-          ).map(({ label, value }) => (
-            <IndexBar key={label} label={label} value={parseFloat(value.toFixed(1))} />
+            ] as Array<{ label: string; value: number }>
+          ).map(({ label, value }, i) => (
+            <div key={i}>
+              <IndexBar label={label} value={parseFloat(value.toFixed(1))} />
+            </div>
           ))}
 
           {/* Race score — prominent */}
