@@ -4,20 +4,68 @@ import { useState } from "react";
 import HeroScreen from "@/components/screens/HeroScreen";
 import HowToPlay from "@/components/screens/HowToPlay";
 import TeamSetup from "@/components/screens/TeamSetup";
+import DriverSelectionScreen from "@/components/screens/DriverSelectionScreen";
+import BudgetAllocationScreen from "@/components/screens/BudgetAllocationScreen";
+import ParisRaceScreen from "@/components/screens/ParisRaceScreen";
 import Dashboard from "@/components/screens/Dashboard";
 import CrisisCard from "@/components/screens/CrisisCard";
 import SeasonResult from "@/components/screens/SeasonResult";
 import { seasonResult } from "@/data/mockData";
+import { applyInvestment, INVESTMENT_DIVISORS } from "@/src/lib/simulation";
+import type { GameState, Driver, BudgetAllocation } from "@/src/types/game";
 
-type Screen = "hero" | "howtoplay" | "teamsetup" | "dashboard" | "crisis" | "result";
+type Screen =
+  | "hero"
+  | "howtoplay"
+  | "teamsetup"
+  | "driverselection"
+  | "budgetallocation"
+  | "parisrace"
+  | "dashboard"
+  | "crisis"
+  | "result";
+
+const INITIAL_STATE: GameState = {
+  teamName: "",
+  budget: 100_000_000,
+  driver: null,
+  carDevelopment: 0,
+  staffQuality: 0,
+  publicImage: 0,
+  riskWillingness: 5,
+  currentRace: 1,
+};
 
 export default function Home() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("hero");
-  const [teamName, setTeamName] = useState("Vortex Motorsport");
+  const [gameState, setGameState] = useState<GameState>(INITIAL_STATE);
+
+  function patchState(patch: Partial<GameState>) {
+    setGameState((prev) => ({ ...prev, ...patch }));
+  }
 
   function handleTeamConfirm(name: string) {
-    setTeamName(name);
-    setCurrentScreen("dashboard");
+    patchState({ teamName: name });
+    setCurrentScreen("driverselection");
+  }
+
+  function handleDriverSelect(driver: Driver) {
+    patchState({
+      driver,
+      budget: gameState.budget - driver.cost,
+    });
+    setCurrentScreen("budgetallocation");
+  }
+
+  function handleBudgetConfirm(alloc: BudgetAllocation) {
+    const totalInvested = alloc.carDevelopment + alloc.staffQuality + alloc.publicImage;
+    patchState({
+      carDevelopment: applyInvestment(gameState.carDevelopment, alloc.carDevelopment, INVESTMENT_DIVISORS.carDevelopment),
+      staffQuality: applyInvestment(gameState.staffQuality, alloc.staffQuality, INVESTMENT_DIVISORS.staffQuality),
+      publicImage: applyInvestment(gameState.publicImage, alloc.publicImage, INVESTMENT_DIVISORS.publicImage),
+      budget: gameState.budget - totalInvested,
+    });
+    setCurrentScreen("parisrace");
   }
 
   return (
@@ -82,9 +130,31 @@ export default function Home() {
           <TeamSetup onConfirm={handleTeamConfirm} />
         )}
 
+        {currentScreen === "driverselection" && (
+          <DriverSelectionScreen
+            budget={gameState.budget}
+            onSelect={handleDriverSelect}
+          />
+        )}
+
+        {currentScreen === "budgetallocation" && (
+          <BudgetAllocationScreen
+            budget={gameState.budget}
+            onConfirm={handleBudgetConfirm}
+          />
+        )}
+
+        {currentScreen === "parisrace" && (
+          <ParisRaceScreen
+            state={gameState}
+            onStateChange={patchState}
+            onContinue={() => setCurrentScreen("hero")}
+          />
+        )}
+
         {currentScreen === "dashboard" && (
           <Dashboard
-            teamName={teamName}
+            teamName={gameState.teamName}
             onCrisisEvent={() => setCurrentScreen("crisis")}
             onEndSeason={() => setCurrentScreen("result")}
           />
