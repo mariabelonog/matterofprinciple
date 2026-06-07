@@ -13,22 +13,22 @@ const steps = [
   {
     num: "02",
     title: "INVEST BEFORE EACH RACE",
-    body: "Allocate Geld into car development, staff quality, and public image. Car dev and staff grow their indices by investment ÷ 20 (capped at 10). Public image grows by investment ÷ 25 — but your risk choice erodes it by 0.05 per risk point each race.",
+    body: "Allocate Geld into car development, staff quality, and public image. The impact of each category is displayed in the key formulas section.",
   },
   {
     num: "03",
     title: "SET YOUR RISK WILLINGNESS",
-    body: "Before each race, choose a risk level (0–10). Higher risk boosts your strategy and driver performance, but raises crash probability and slowly damages your public image.",
+    body: "High risk high reward is our slogan. Risk is an integral part of racing, you have to decide weather you wanna go all in.",
   },
   {
     num: "04",
     title: "RACE THE CALENDAR",
-    body: "8 races across Paris, Strassburg, Stuttgart, Vienna, Budapest, Bucharest, Sinaia, and Istanbul. Your race score is calculated from car performance, driver skill, and strategy — then ranked against 9 CPU opponents to determine your finishing position.",
+    body: "8 races across Paris, Strassburg, Stuttgart, Vienna, Budapest, Bucharest, Sinaia, and Istanbul. Your race score is calculated from car performance, driver skill, and strategy and determines your place.",
   },
   {
     num: "05",
     title: "MANAGE CRASHES & SPONSORS",
-    body: "Each race: a sponsor contract may pay out (publicImage ÷ 10 chance, worth publicImage × 3M G). A crash may destroy equipment (chance = riskWillingness ÷ 20; loss tied to your last two car investments). Budget < 0 means game over.",
+    body: "You constantly need money not only to develop the car and pay for the staff but also because more often then not incidents on track happen.",
   },
   {
     num: "06",
