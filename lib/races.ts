@@ -20,7 +20,7 @@ export const RACES: Race[] = [
     city: "Stuttgart",
     isCrisis: false,
     opponentScores: [1.9, 2.4, 2.7, 3.0, 3.3, 3.6, 4.0, 4.4, 4.8],
-    atmosphereText: "\"Das Beste oder nichts.\" [The best or nothing.] — Gottlieb Daimler",
+    atmosphereText: "Cradle of the automobile.",
   },
   {
     round: 4,
@@ -34,14 +34,14 @@ export const RACES: Race[] = [
     city: "Budapest",
     isCrisis: true,
     opponentScores: [2.2, 2.7, 3.1, 3.5, 3.8, 4.2, 4.6, 5.0, 5.5],
-    atmosphereText: "\"Budapest is, I believe, the most beautiful city in Europe.\" — Patrick Leigh Fermor, A Time of Gifts",
+    atmosphereText: "\"Budapest is a prime site for dreams: the East's exuberant vision of the West, the West's uneasy hallucination of the East.\"",
   },
   {
     round: 6,
     city: "Bucharest",
     isCrisis: false,
     opponentScores: [2.3, 2.8, 3.2, 3.6, 4.0, 4.4, 4.8, 5.2, 5.7],
-    atmosphereText: "\"Bucharest is the Paris of the East — the compliment was sincere when first given, and it has endured.\" — Sacheverell Sitwell, Roumanian Journey",
+    atmosphereText: "Little Paris of the East.",
   },
   {
     round: 7,
