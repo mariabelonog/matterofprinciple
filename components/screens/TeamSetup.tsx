@@ -121,12 +121,9 @@ export default function TeamSetup({ onConfirm }: TeamSetupProps) {
           </span>
         )}
 
-        <div className="flex justify-between items-center">
+        <div className="flex items-center">
           <span className="text-gray-700 text-[14px] font-mono">
             {teamName.trim().length} / 32
-          </span>
-          <span className="text-gray-600 text-[13px] font-mono">
-            No real team names · Keep it fictional
           </span>
         </div>
       </div>

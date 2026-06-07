@@ -89,10 +89,11 @@ function OrientExpressRoute({ currentRound }: { currentRound: number }) {
               />
               {/* City label */}
               <span
-                className="text-[9px] font-mono text-center leading-tight"
+                className="font-mono text-center leading-tight"
                 style={{
                   color: textColor,
-                  maxWidth: "36px",
+                  fontSize: city.length > 7 ? "7px" : "9px",
+                  maxWidth: "44px",
                   wordBreak: "break-word",
                   fontWeight: isCurrent ? "bold" : "normal",
                 }}
