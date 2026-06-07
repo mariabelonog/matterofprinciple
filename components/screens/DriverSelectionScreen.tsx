@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { Driver } from "@/src/types/game";
-import { DRIVERS } from "@/src/lib/simulation";
+import type { Driver } from "@/types/game";
+import { DRIVERS } from "@/lib/simulation";
 
 interface Props {
   budget: number;
@@ -117,9 +117,6 @@ export default function DriverSelectionScreen({ budget, onSelect }: Props) {
 
                 {/* Description */}
                 <p className="text-gray-300 text-[14px] font-mono">{driver.description}</p>
-
-                {/* Risk profile */}
-                <p className="text-gray-500 text-[13px] font-mono italic">{driver.riskProfile}</p>
               </div>
             </button>
           );

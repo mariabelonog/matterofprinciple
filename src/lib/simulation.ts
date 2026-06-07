@@ -1,4 +1,4 @@
-import type { Driver, GameState, RaceResult } from "@/src/types/game";
+import type { Driver, GameState, RaceResult } from "@/types/game";
 
 export const DRIVERS: Driver[] = [
   {
@@ -7,7 +7,6 @@ export const DRIVERS: Driver[] = [
     driverIndex: 5.8,
     cost: 15_000_000,
     description: "You'll probably regret your decision.",
-    riskProfile: "Unpredictable. Cheap. Occasionally inspired.",
   },
   {
     id: "eclair",
@@ -15,15 +14,13 @@ export const DRIVERS: Driver[] = [
     driverIndex: 7.2,
     cost: 35_000_000,
     description: "Semi-okay driver. No heroics but not problems either.",
-    riskProfile: "Consistent mid-tier. Reliable points scorer.",
   },
   {
     id: "mestappen",
-    name: "Vax Mestappen",
+    name: "Vax Merstappen",
     driverIndex: 9.9,
     cost: 70_000_000,
     description: "High risk high reward.",
-    riskProfile: "Elite ceiling. Leaves almost nothing for the car.",
   },
 ];
 

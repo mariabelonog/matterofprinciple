@@ -6,13 +6,16 @@ import HowToPlay from "@/components/screens/HowToPlay";
 import TeamSetup from "@/components/screens/TeamSetup";
 import DriverSelectionScreen from "@/components/screens/DriverSelectionScreen";
 import BudgetAllocationScreen from "@/components/screens/BudgetAllocationScreen";
-import ParisRaceScreen from "@/components/screens/ParisRaceScreen";
+import RaceScreen from "@/components/screens/RaceScreen";
+import InvestmentScreen from "@/components/screens/InvestmentScreen";
+import FinalSeasonResult from "@/components/screens/FinalSeasonResult";
 import Dashboard from "@/components/screens/Dashboard";
 import CrisisCard from "@/components/screens/CrisisCard";
 import SeasonResult from "@/components/screens/SeasonResult";
 import { seasonResult } from "@/data/mockData";
-import { applyInvestment, INVESTMENT_DIVISORS } from "@/src/lib/simulation";
-import type { GameState, Driver, BudgetAllocation } from "@/src/types/game";
+import { applyInvestment, INVESTMENT_DIVISORS } from "@/lib/simulation";
+import { RACES } from "@/lib/races";
+import type { GameState, Driver, BudgetAllocation, ExtendedRaceResult } from "@/types/game";
 
 type Screen =
   | "hero"
@@ -20,7 +23,9 @@ type Screen =
   | "teamsetup"
   | "driverselection"
   | "budgetallocation"
-  | "parisrace"
+  | "race"
+  | "investment"
+  | "seasonresult"
   | "dashboard"
   | "crisis"
   | "result";
@@ -34,11 +39,16 @@ const INITIAL_STATE: GameState = {
   publicImage: 0,
   riskWillingness: 5,
   currentRace: 1,
+  lastCarInvestment: 0,
+  previousCarInvestment: 0,
+  raceHistory: [],
 };
 
 export default function Home() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("hero");
   const [gameState, setGameState] = useState<GameState>(INITIAL_STATE);
+  // Pending result — stored until user clicks continue, then we navigate
+  const [pendingResult, setPendingResult] = useState<ExtendedRaceResult | null>(null);
 
   function patchState(patch: Partial<GameState>) {
     setGameState((prev) => ({ ...prev, ...patch }));
@@ -61,23 +71,80 @@ export default function Home() {
     const totalInvested = alloc.carDevelopment + alloc.staffQuality + alloc.publicImage;
     patchState({
       carDevelopment: applyInvestment(gameState.carDevelopment, alloc.carDevelopment, INVESTMENT_DIVISORS.carDevelopment),
-      staffQuality: applyInvestment(gameState.staffQuality, alloc.staffQuality, INVESTMENT_DIVISORS.staffQuality),
-      publicImage: applyInvestment(gameState.publicImage, alloc.publicImage, INVESTMENT_DIVISORS.publicImage),
+      staffQuality:   applyInvestment(gameState.staffQuality, alloc.staffQuality, INVESTMENT_DIVISORS.staffQuality),
+      publicImage:    applyInvestment(gameState.publicImage, alloc.publicImage, INVESTMENT_DIVISORS.publicImage),
       budget: gameState.budget - totalInvested,
+      lastCarInvestment: alloc.carDevelopment,
+      previousCarInvestment: 0,
+      currentRace: 1,
     });
-    setCurrentScreen("parisrace");
+    setCurrentScreen("race");
   }
 
+  // Called by RaceScreen when race finishes — applies budget changes, stores result
+  function handleRaceComplete(result: ExtendedRaceResult) {
+    setGameState((prev) => {
+      const newBudget = prev.budget + result.sponsorIncome - result.crashLosses;
+      return {
+        ...prev,
+        budget: newBudget,
+        raceHistory: [...prev.raceHistory, { ...result, budgetAfter: newBudget }],
+      };
+    });
+    setPendingResult(result);
+  }
+
+  // Called when user clicks "continue" button after reading race result
+  function handleRaceContinue() {
+    if (!pendingResult) return;
+
+    const newBudget = gameState.budget; // already updated in handleRaceComplete
+    const isLastRace = gameState.currentRace >= 8;
+    const isBankrupt = newBudget < 0;
+
+    setPendingResult(null);
+
+    if (isBankrupt || isLastRace) {
+      setCurrentScreen("seasonresult");
+    } else {
+      setCurrentScreen("investment");
+    }
+  }
+
+  function handleInvestmentConfirm(alloc: BudgetAllocation) {
+    const totalInvested = alloc.carDevelopment + alloc.staffQuality + alloc.publicImage;
+    setGameState((prev) => ({
+      ...prev,
+      carDevelopment: applyInvestment(prev.carDevelopment, alloc.carDevelopment, INVESTMENT_DIVISORS.carDevelopment),
+      staffQuality:   applyInvestment(prev.staffQuality, alloc.staffQuality, INVESTMENT_DIVISORS.staffQuality),
+      publicImage:    applyInvestment(prev.publicImage, alloc.publicImage, INVESTMENT_DIVISORS.publicImage),
+      budget: prev.budget - totalInvested,
+      // Shift car investment history for crash calculation
+      previousCarInvestment: prev.lastCarInvestment,
+      lastCarInvestment: alloc.carDevelopment,
+      currentRace: prev.currentRace + 1,
+    }));
+    setCurrentScreen("race");
+  }
+
+  function handlePlayAgain() {
+    setGameState(INITIAL_STATE);
+    setPendingResult(null);
+    setCurrentScreen("hero");
+  }
+
+  // Current race data
+  const currentRaceData = RACES[gameState.currentRace - 1] ?? RACES[0];
+  // Next city for investment screen
+  const nextRaceData = RACES[gameState.currentRace] ?? null;
+
   return (
-    <main
-      className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-start relative overflow-hidden"
-    >
+    <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-start relative overflow-hidden">
       {/* Scanline overlay */}
       <div
         className="fixed inset-0 pointer-events-none z-10 opacity-[0.04]"
         style={{
-          backgroundImage:
-            "repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 4px)",
+          backgroundImage: "repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 4px)",
         }}
       />
 
@@ -94,26 +161,18 @@ export default function Home() {
       {/* Top pixel border strip */}
       <div className="fixed top-0 left-0 w-full flex z-20">
         {Array.from({ length: 64 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex-1 h-3"
-            style={{ backgroundColor: i % 2 === 0 ? "#dc2626" : "#991b1b" }}
-          />
+          <div key={i} className="flex-1 h-3" style={{ backgroundColor: i % 2 === 0 ? "#dc2626" : "#991b1b" }} />
         ))}
       </div>
 
       {/* Bottom pixel border strip */}
       <div className="fixed bottom-0 left-0 w-full flex z-20">
         {Array.from({ length: 64 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex-1 h-3"
-            style={{ backgroundColor: i % 2 === 0 ? "#991b1b" : "#dc2626" }}
-          />
+          <div key={i} className="flex-1 h-3" style={{ backgroundColor: i % 2 === 0 ? "#991b1b" : "#dc2626" }} />
         ))}
       </div>
 
-      {/* Screen content — padded clear of top/bottom strips */}
+      {/* Screen content */}
       <div className="w-full pt-4 pb-6 flex flex-col items-center">
         {currentScreen === "hero" && (
           <HeroScreen
@@ -144,14 +203,40 @@ export default function Home() {
           />
         )}
 
-        {currentScreen === "parisrace" && (
-          <ParisRaceScreen
-            state={gameState}
-            onStateChange={patchState}
-            onContinue={() => setCurrentScreen("hero")}
+        {currentScreen === "race" && (
+          // key prop forces remount between races so sponsor roll and phase reset
+          <div key={`race-${gameState.currentRace}`}>
+            <RaceScreen
+              race={currentRaceData}
+              state={gameState}
+              onStateChange={patchState}
+              onRaceComplete={handleRaceComplete}
+              onContinue={handleRaceContinue}
+            />
+          </div>
+        )}
+
+        {currentScreen === "investment" && nextRaceData && (
+          <InvestmentScreen
+            raceNumber={gameState.currentRace}
+            nextCity={nextRaceData.city}
+            budget={gameState.budget}
+            currentCarDev={gameState.carDevelopment}
+            currentStaff={gameState.staffQuality}
+            currentImage={gameState.publicImage}
+            onConfirm={handleInvestmentConfirm}
           />
         )}
 
+        {currentScreen === "seasonresult" && (
+          <FinalSeasonResult
+            state={gameState}
+            raceHistory={gameState.raceHistory}
+            onPlayAgain={handlePlayAgain}
+          />
+        )}
+
+        {/* Legacy screens kept for compat */}
         {currentScreen === "dashboard" && (
           <Dashboard
             teamName={gameState.teamName}

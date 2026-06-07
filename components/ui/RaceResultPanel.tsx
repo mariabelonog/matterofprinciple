@@ -1,5 +1,5 @@
 "use client";
-import type { RaceResult } from "@/src/types/game";
+import type { RaceResult } from "@/types/game";
 
 interface Props {
   result: RaceResult;

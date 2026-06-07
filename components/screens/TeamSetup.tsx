@@ -58,7 +58,7 @@ export default function TeamSetup({ onConfirm }: TeamSetupProps) {
         }}
       >
         <p className="text-amber-300 text-[14px] font-mono leading-relaxed">
-          You have been appointed as the new team principal of a struggling racing team. The board gives you 100M G and one season to stabilize the team.
+          Rararacing is about to go bankrupt. Nobody wants to sail the sinking ship. Your friend from its executives board is begging for a favor — take over team principal's role and lead the boat out of the storm.
         </p>
       </div>
 
@@ -71,7 +71,7 @@ export default function TeamSetup({ onConfirm }: TeamSetupProps) {
           NAME YOUR TEAM
         </h2>
         <p className="text-gray-500 text-[15px] font-mono max-w-sm">
-          You are the newly appointed team principal. Your first act: give this outfit an identity.
+          As you name a ship, so it will sail.
         </p>
       </div>
 
@@ -102,7 +102,7 @@ export default function TeamSetup({ onConfirm }: TeamSetupProps) {
           }}
           onKeyDown={handleKeyDown}
           maxLength={32}
-          placeholder="e.g. IRONCLAD RACING"
+          placeholder="e.g. CORAZÓN Y CABEZA"
           className="w-full bg-[#0a0a0a] text-white text-[16px] tracking-widest px-4 py-3 outline-none placeholder-gray-700 focus:ring-0"
           style={{
             fontFamily: "var(--font-pixel), monospace",
@@ -121,12 +121,9 @@ export default function TeamSetup({ onConfirm }: TeamSetupProps) {
           </span>
         )}
 
-        <div className="flex justify-between items-center">
+        <div className="flex items-center">
           <span className="text-gray-700 text-[14px] font-mono">
             {teamName.trim().length} / 32
-          </span>
-          <span className="text-gray-600 text-[13px] font-mono">
-            No real team names · Keep it fictional
           </span>
         </div>
       </div>

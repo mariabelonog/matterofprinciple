@@ -5,7 +5,12 @@ import type { BudgetAllocation } from "@/types/game";
 import { applyInvestment, INVESTMENT_DIVISORS } from "@/lib/simulation";
 
 interface Props {
+  raceNumber: number;
+  nextCity: string;
   budget: number;
+  currentCarDev: number;
+  currentStaff: number;
+  currentImage: number;
   onConfirm: (alloc: BudgetAllocation) => void;
 }
 
@@ -75,7 +80,15 @@ function AllocInput({ label, description, raw, onRawChange, currentIndex, newInd
   );
 }
 
-export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
+export default function InvestmentScreen({
+  raceNumber,
+  nextCity,
+  budget,
+  currentCarDev,
+  currentStaff,
+  currentImage,
+  onConfirm,
+}: Props) {
   const [carDevRaw, setCarDevRaw] = useState("");
   const [staffRaw, setStaffRaw] = useState("");
   const [imageRaw, setImageRaw] = useState("");
@@ -89,9 +102,9 @@ export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
   const remainingM = budgetM - totalAllocatedM;
   const isOverspending = totalAllocatedM > budgetM;
 
-  const newCarDev = applyInvestment(0, carDevM * 1_000_000, INVESTMENT_DIVISORS.carDevelopment);
-  const newStaff  = applyInvestment(0, staffM  * 1_000_000, INVESTMENT_DIVISORS.staffQuality);
-  const newImage  = applyInvestment(0, imageM  * 1_000_000, INVESTMENT_DIVISORS.publicImage);
+  const newCarDev = applyInvestment(currentCarDev, carDevM * 1_000_000, INVESTMENT_DIVISORS.carDevelopment);
+  const newStaff  = applyInvestment(currentStaff,  staffM  * 1_000_000, INVESTMENT_DIVISORS.staffQuality);
+  const newImage  = applyInvestment(currentImage,  imageM  * 1_000_000, INVESTMENT_DIVISORS.publicImage);
 
   function handleConfirm() {
     if (isOverspending) return;
@@ -104,13 +117,15 @@ export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
 
   return (
     <div className="relative z-20 px-6 max-w-2xl mx-auto flex flex-col items-center gap-8 py-16 w-full">
+      {/* Header */}
       <div
-        className="px-4 py-2 text-red-400 text-[17px] tracking-widest uppercase"
+        className="px-4 py-2 text-red-400 text-[17px] tracking-widest uppercase text-center"
         style={{ fontFamily: "var(--font-pixel), monospace", border: "3px solid #dc2626", boxShadow: "4px 4px 0px #7f1d1d", backgroundColor: "#1c0a0a" }}
       >
-        ▶ PRE-SEASON BUDGET
+        ▶ RACE {raceNumber} COMPLETE — INVEST BEFORE {nextCity.toUpperCase()}
       </div>
 
+      {/* Available budget */}
       <div
         className="w-full p-4 flex items-center justify-between gap-4 flex-wrap"
         style={{ border: "3px solid #374151", boxShadow: "4px 4px 0px #111827", backgroundColor: "#111111" }}
@@ -128,7 +143,7 @@ export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
       {isOverspending && (
         <div className="w-full p-3 text-center" style={{ border: "3px solid #dc2626", backgroundColor: "#1c0a0a" }}>
           <span className="text-red-400 text-[13px] tracking-widest" style={{ fontFamily: "var(--font-pixel), monospace" }}>
-            ⚠ OVERSPENDING BY {(totalAllocatedM - budgetM).toFixed(1)}M G
+            OVERSPENDING BY {(totalAllocatedM - budgetM).toFixed(1)}M G
           </span>
         </div>
       )}
@@ -138,7 +153,7 @@ export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
         description="Remember that the result depends mostly on a car. Build a rocketship."
         raw={carDevRaw}
         onRawChange={setCarDevRaw}
-        currentIndex={0}
+        currentIndex={currentCarDev}
         newIndex={newCarDev}
         maxM={budgetM}
       />
@@ -148,7 +163,7 @@ export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
         description="Staff quality is how you build a car and how you strategize during a race. Never neglect!"
         raw={staffRaw}
         onRawChange={setStaffRaw}
-        currentIndex={0}
+        currentIndex={currentStaff}
         newIndex={newStaff}
         maxM={budgetM}
       />
@@ -158,13 +173,13 @@ export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
         description="You are broke and need money. So invest in some tiktok challenges for sponsors to like you."
         raw={imageRaw}
         onRawChange={setImageRaw}
-        currentIndex={0}
+        currentIndex={currentImage}
         newIndex={newImage}
         maxM={budgetM}
       />
 
       <p className="text-gray-600 text-[13px] font-mono text-center">
-        Unspent budget becomes financial reserve — you do not have to spend everything.
+        Unspent budget remains as financial reserve.
       </p>
 
       <button
@@ -179,7 +194,7 @@ export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
         }}
         type="button"
       >
-        ▶ CONTINUE TO PARIS →
+        ▶ CONTINUE TO {nextCity.toUpperCase()} →
       </button>
     </div>
   );

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { GameState, RaceResult } from "@/src/types/game";
-import { runParisRace } from "@/src/lib/simulation";
+import type { GameState, RaceResult } from "@/types/game";
+import { runParisRace } from "@/lib/simulation";
 import TeamStatusPanel from "@/components/ui/TeamStatusPanel";
 import RiskSelector from "@/components/ui/RiskSelector";
 import RaceResultPanel from "@/components/ui/RaceResultPanel";
