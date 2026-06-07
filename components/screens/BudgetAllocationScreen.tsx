@@ -135,7 +135,7 @@ export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
 
       <AllocInput
         label="CAR DEVELOPMENT"
-        description="Improves car performance on track. Boosts carPerformance score directly."
+        description="Remember that the result depends mostly on a car. Build a rocketship."
         raw={carDevRaw}
         onRawChange={setCarDevRaw}
         currentIndex={0}
@@ -145,7 +145,7 @@ export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
 
       <AllocInput
         label="STAFF QUALITY"
-        description="Better engineers and strategists improve both car performance and race strategy."
+        description="Staff quality is how you build a car and how you strategize during a race. Never neglect!"
         raw={staffRaw}
         onRawChange={setStaffRaw}
         currentIndex={0}
@@ -155,7 +155,7 @@ export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
 
       <AllocInput
         label="PUBLIC IMAGE"
-        description="Increases chance of sponsor contracts and board confidence."
+        description="You are broke and need money. So invest in some tiktok challenges for sponsors to like you."
         raw={imageRaw}
         onRawChange={setImageRaw}
         currentIndex={0}

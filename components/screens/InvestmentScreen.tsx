@@ -150,7 +150,7 @@ export default function InvestmentScreen({
 
       <AllocInput
         label="CAR DEVELOPMENT"
-        description="Improves car performance on track."
+        description="Remember that the result depends mostly on a car. Build a rocketship."
         raw={carDevRaw}
         onRawChange={setCarDevRaw}
         currentIndex={currentCarDev}
@@ -160,7 +160,7 @@ export default function InvestmentScreen({
 
       <AllocInput
         label="STAFF QUALITY"
-        description="Better engineers improve car performance and race strategy."
+        description="Staff quality is how you build a car and how you strategize during a race. Never neglect!"
         raw={staffRaw}
         onRawChange={setStaffRaw}
         currentIndex={currentStaff}
@@ -170,7 +170,7 @@ export default function InvestmentScreen({
 
       <AllocInput
         label="PUBLIC IMAGE"
-        description="Increases sponsor contract probability before each race."
+        description="You are broke and need money. So invest in some tiktok challenges for sponsors to like you."
         raw={imageRaw}
         onRawChange={setImageRaw}
         currentIndex={currentImage}
