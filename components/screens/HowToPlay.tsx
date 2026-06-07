@@ -123,35 +123,35 @@ export default function HowToPlay({ onBack }: HowToPlayProps) {
         {[
           {
             label: "CAR PERFORMANCE",
-            lhs: "carPerf",
+            lhs: "Car Performance",
             terms: [
-              { value: "carDev", weight: "60%", color: "#f59e0b" },
-              { value: "staffQuality", weight: "40%", color: "#22c55e" },
+              { value: "Car Development", weight: "60%", color: "#f59e0b" },
+              { value: "Staff Quality", weight: "40%", color: "#22c55e" },
             ],
           },
           {
             label: "STRATEGY",
-            lhs: "strategy",
+            lhs: "Strategy",
             terms: [
-              { value: "staffQuality", weight: "70%", color: "#22c55e" },
-              { value: "riskWillingness", weight: "30%", color: "#f87171" },
+              { value: "Staff Quality", weight: "70%", color: "#22c55e" },
+              { value: "Risk", weight: "30%", color: "#f87171" },
             ],
           },
           {
             label: "DRIVER INPUT",
-            lhs: "driverInput",
+            lhs: "Driver Input",
             terms: [
-              { value: "driverIndex", weight: "60%", color: "#818cf8" },
-              { value: "riskWillingness", weight: "40%", color: "#f87171" },
+              { value: "Driver Skill", weight: "60%", color: "#818cf8" },
+              { value: "Risk", weight: "40%", color: "#f87171" },
             ],
           },
           {
             label: "RACE SCORE",
-            lhs: "raceScore",
+            lhs: "Race Score",
             terms: [
-              { value: "carPerf", weight: "60%", color: "#f59e0b" },
-              { value: "driverInput", weight: "10%", color: "#818cf8" },
-              { value: "strategy", weight: "30%", color: "#22c55e" },
+              { value: "Car Performance", weight: "60%", color: "#f59e0b" },
+              { value: "Driver Input", weight: "10%", color: "#818cf8" },
+              { value: "Strategy", weight: "30%", color: "#22c55e" },
             ],
             note: "Budapest: driver 40%",
           },
