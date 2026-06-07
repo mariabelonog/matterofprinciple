@@ -71,7 +71,7 @@ export default function TeamSetup({ onConfirm }: TeamSetupProps) {
           NAME YOUR TEAM
         </h2>
         <p className="text-gray-500 text-[15px] font-mono max-w-sm">
-          You are the newly appointed team principal. Your first act: give this outfit an identity.
+          As you name a ship, so it will sail.
         </p>
       </div>
 
@@ -102,7 +102,7 @@ export default function TeamSetup({ onConfirm }: TeamSetupProps) {
           }}
           onKeyDown={handleKeyDown}
           maxLength={32}
-          placeholder="e.g. IRONCLAD RACING"
+          placeholder="e.g. CORAZÓN Y CABEZA"
           className="w-full bg-[#0a0a0a] text-white text-[16px] tracking-widest px-4 py-3 outline-none placeholder-gray-700 focus:ring-0"
           style={{
             fontFamily: "var(--font-pixel), monospace",
