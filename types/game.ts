@@ -4,7 +4,6 @@ export interface Driver {
   driverIndex: number; // 0–10
   cost: number;        // in G (Geld)
   description: string;
-  riskProfile: string;
 }
 
 export interface GameState {

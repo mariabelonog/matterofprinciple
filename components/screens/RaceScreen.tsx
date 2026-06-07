@@ -19,6 +19,94 @@ interface Props {
 
 type Phase = "sponsor" | "crisis" | "setup" | "result";
 
+// ─── Orient Express route strip ──────────────────────────────────────────────
+
+const ROUTE = ["Paris","Strassburg","Stuttgart","Vienna","Budapest","Bucharest","Sinaia","Istanbul"];
+
+function OrientExpressRoute({ currentRound }: { currentRound: number }) {
+  return (
+    <div
+      className="w-full p-4 flex flex-col gap-3"
+      style={{ border: "3px solid #78350f", boxShadow: "4px 4px 0px #1c1000", backgroundColor: "#0a0600" }}
+    >
+      {/* Label */}
+      <div className="flex items-center gap-2">
+        <span
+          className="text-amber-600 text-[11px] tracking-[0.25em] uppercase"
+          style={{ fontFamily: "var(--font-pixel), monospace" }}
+        >
+          ▶ ORIENT EXPRESS CIRCUIT
+        </span>
+        <div className="flex-1 h-[1px] bg-amber-900 opacity-40" />
+        <span className="text-amber-900 text-[11px] font-mono">SEASON 01</span>
+      </div>
+
+      {/* Track line with station dots */}
+      <div className="relative flex items-center w-full" style={{ height: "48px" }}>
+        {/* Continuous rail line */}
+        <div
+          className="absolute w-full"
+          style={{ top: "16px", height: "2px", backgroundColor: "#3d2408" }}
+        />
+        {/* Completed portion */}
+        <div
+          className="absolute"
+          style={{
+            top: "16px",
+            height: "2px",
+            left: 0,
+            width: `${((currentRound - 1) / 7) * 100}%`,
+            backgroundColor: "#92400e",
+          }}
+        />
+
+        {/* Station dots */}
+        {ROUTE.map((city, i) => {
+          const round = i + 1;
+          const isDone = round < currentRound;
+          const isCurrent = round === currentRound;
+          const pct = (i / 7) * 100;
+          const dotColor = isDone ? "#92400e" : isCurrent ? "#f59e0b" : "#3d2408";
+          const textColor = isDone ? "#78350f" : isCurrent ? "#f59e0b" : "#44331a";
+
+          return (
+            <div
+              key={city}
+              className="absolute flex flex-col items-center"
+              style={{ left: `${pct}%`, transform: "translateX(-50%)" }}
+            >
+              {/* Dot */}
+              <div
+                style={{
+                  width: isCurrent ? "10px" : "6px",
+                  height: isCurrent ? "10px" : "6px",
+                  backgroundColor: dotColor,
+                  border: isCurrent ? "2px solid #f59e0b" : "1px solid #3d2408",
+                  borderRadius: "0",
+                  marginBottom: "4px",
+                  boxShadow: isCurrent ? "0 0 6px #f59e0b88" : "none",
+                }}
+              />
+              {/* City label */}
+              <span
+                className="text-[9px] font-mono text-center leading-tight"
+                style={{
+                  color: textColor,
+                  maxWidth: "36px",
+                  wordBreak: "break-word",
+                  fontWeight: isCurrent ? "bold" : "normal",
+                }}
+              >
+                {city.toUpperCase()}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── City card silhouettes ────────────────────────────────────────────────────
 
 function EiffelTower() {
@@ -477,6 +565,9 @@ export default function RaceScreen({ race, state, onStateChange, onRaceComplete,
       >
         ▶ RACE {race.round} — {race.city.toUpperCase()}
       </div>
+
+      {/* Orient Express route strip */}
+      <OrientExpressRoute currentRound={race.round} />
 
       {/* City card always visible */}
       <CityCard race={race} />

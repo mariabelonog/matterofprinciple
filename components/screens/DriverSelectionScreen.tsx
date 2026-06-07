@@ -117,9 +117,6 @@ export default function DriverSelectionScreen({ budget, onSelect }: Props) {
 
                 {/* Description */}
                 <p className="text-gray-300 text-[14px] font-mono">{driver.description}</p>
-
-                {/* Risk profile */}
-                <p className="text-gray-500 text-[13px] font-mono italic">{driver.riskProfile}</p>
               </div>
             </button>
           );
