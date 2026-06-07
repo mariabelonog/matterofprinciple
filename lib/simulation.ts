@@ -17,7 +17,7 @@ export const DRIVERS: Driver[] = [
   },
   {
     id: "mestappen",
-    name: "Vax Mestappen",
+    name: "Vax Merstappen",
     driverIndex: 9.9,
     cost: 70_000_000,
     description: "High risk high reward.",

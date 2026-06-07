@@ -110,7 +110,7 @@ export default function HeroScreen({ onStart, onHowToPlay }: HeroScreenProps) {
         className="text-gray-700 text-[16px] tracking-widest uppercase mt-1"
         style={{ fontFamily: "var(--font-pixel), monospace" }}
       >
-        Season 01 · Vortex Motorsport
+        Season 01 · Rararacing Motorsports
       </p>
     </div>
   );
