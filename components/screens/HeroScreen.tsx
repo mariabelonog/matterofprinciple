@@ -75,9 +75,7 @@ export default function HeroScreen({ onStart, onHowToPlay }: HeroScreenProps) {
         YOUR TEAM IS IN CRISIS.
       </p>
       <p className="text-gray-400 text-[17px] leading-relaxed max-w-sm mx-auto tracking-wide font-mono">
-        Vortex Motorsport is on the brink of collapse. A season of boardroom betrayals, sponsor
-        withdrawals, and spiraling costs has left you holding the wrench. One season. Every
-        decision counts. Prove your principles are worth fighting for.
+        Rararacing is about to go bankrupt. Nobody wants to sail the sinking ship. Your friend from its executives board is begging for a favor — take over team principal's role and lead the boat out of the storm.
       </p>
 
       {/* Buttons */}
