@@ -146,7 +146,6 @@ export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
       <AllocInput
         label="STAFF QUALITY"
         description="Better engineers and strategists improve both car performance and race strategy."
-        formula="index += investment ÷ 10M"
         raw={staffRaw}
         onRawChange={setStaffRaw}
         currentIndex={0}
