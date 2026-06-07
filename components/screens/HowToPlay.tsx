@@ -97,27 +97,92 @@ export default function HowToPlay({ onBack }: HowToPlayProps) {
         ))}
       </div>
 
-      {/* Indices reference box */}
+      {/* Key formulas box */}
       <div
-        className="w-full p-4 flex flex-col gap-2"
+        className="w-full flex flex-col gap-0"
         style={{
           border: "3px solid #dc2626",
           boxShadow: "4px 4px 0px #7f1d1d",
-          backgroundColor: "#1c0a0a",
+          backgroundColor: "#0d0404",
         }}
       >
-        <span
-          className="text-red-400 text-[16px] tracking-widest mb-1"
-          style={{ fontFamily: "var(--font-pixel), monospace" }}
+        {/* Header */}
+        <div
+          className="px-4 py-2 flex items-center gap-2"
+          style={{ borderBottom: "2px solid #7f1d1d", backgroundColor: "#1c0a0a" }}
         >
-          ■ KEY FORMULAS
-        </span>
-        <p className="text-gray-400 text-[14px] font-mono leading-loose">
-          carPerformance = carDev × 0.6 + staffQuality × 0.4<br />
-          strategy = staffQuality × 0.7 + riskWillingness × 0.3<br />
-          driverInput = driverIndex × 0.6 + riskWillingness × 0.4<br />
-          raceScore = carPerf × 0.6 + driverInput × 0.1 + strategy × 0.3
-        </p>
+          <span
+            className="text-red-400 text-[13px] tracking-[0.25em] uppercase"
+            style={{ fontFamily: "var(--font-pixel), monospace" }}
+          >
+            ■ KEY FORMULAS
+          </span>
+        </div>
+
+        {/* Formula rows */}
+        {[
+          {
+            label: "CAR PERFORMANCE",
+            lhs: "carPerf",
+            terms: [
+              { value: "carDev", weight: "60%", color: "#f59e0b" },
+              { value: "staffQuality", weight: "40%", color: "#22c55e" },
+            ],
+          },
+          {
+            label: "STRATEGY",
+            lhs: "strategy",
+            terms: [
+              { value: "staffQuality", weight: "70%", color: "#22c55e" },
+              { value: "riskWillingness", weight: "30%", color: "#f87171" },
+            ],
+          },
+          {
+            label: "DRIVER INPUT",
+            lhs: "driverInput",
+            terms: [
+              { value: "driverIndex", weight: "60%", color: "#818cf8" },
+              { value: "riskWillingness", weight: "40%", color: "#f87171" },
+            ],
+          },
+          {
+            label: "RACE SCORE",
+            lhs: "raceScore",
+            terms: [
+              { value: "carPerf", weight: "60%", color: "#f59e0b" },
+              { value: "driverInput", weight: "10%", color: "#818cf8" },
+              { value: "strategy", weight: "30%", color: "#22c55e" },
+            ],
+            note: "Budapest: driver 40%",
+          },
+        ].map((row, i, arr) => (
+          <div
+            key={row.label}
+            className="flex flex-col gap-1 px-4 py-3"
+            style={{ borderBottom: i < arr.length - 1 ? "1px solid #2d0a0a" : undefined }}
+          >
+            <span className="text-gray-600 text-[10px] font-mono tracking-[0.2em] uppercase">{row.label}</span>
+            <div className="flex items-center flex-wrap gap-x-2 gap-y-1">
+              <span className="text-white text-[13px] font-mono">{row.lhs}</span>
+              <span className="text-gray-600 text-[13px] font-mono">=</span>
+              {row.terms.map((t, ti) => (
+                <span key={t.value} className="flex items-center gap-1">
+                  {ti > 0 && <span className="text-gray-600 text-[13px] font-mono">+</span>}
+                  <span className="text-[13px] font-mono" style={{ color: t.color }}>{t.value}</span>
+                  <span
+                    className="text-[10px] font-mono px-1"
+                    style={{ color: "#555", backgroundColor: "#1a1a1a", border: "1px solid #2a2a2a" }}
+                  >
+                    {t.weight}
+                  </span>
+                </span>
+              ))}
+              {row.note && (
+                <span className="text-[10px] font-mono text-amber-800 ml-1">· {row.note}</span>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Back button */}
