@@ -73,7 +73,10 @@ function OrientExpressRoute({ currentRound }: { currentRound: number }) {
             <div
               key={city}
               className="absolute flex flex-col items-center"
-              style={{ left: `${pct}%`, transform: "translateX(-50%)" }}
+              style={{
+                left: `${pct}%`,
+                transform: i === 7 ? "translateX(-100%)" : "translateX(-50%)",
+              }}
             >
               {/* Dot */}
               <div
@@ -85,16 +88,18 @@ function OrientExpressRoute({ currentRound }: { currentRound: number }) {
                   borderRadius: "0",
                   marginBottom: "4px",
                   boxShadow: isCurrent ? "0 0 6px #f59e0b88" : "none",
+                  marginLeft: i === 7 ? "auto" : undefined,
+                  marginRight: i === 7 ? "0" : undefined,
+                  alignSelf: i === 7 ? "flex-end" : undefined,
                 }}
               />
               {/* City label */}
               <span
-                className="font-mono text-center leading-tight"
+                className="font-mono leading-tight"
                 style={{
                   color: textColor,
-                  fontSize: city.length > 7 ? "7px" : "9px",
-                  maxWidth: "44px",
-                  wordBreak: "break-word",
+                  fontSize: "8px",
+                  whiteSpace: "nowrap",
                   fontWeight: isCurrent ? "bold" : "normal",
                 }}
               >

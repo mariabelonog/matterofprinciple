@@ -22,7 +22,6 @@ function parseM(s: string): number {
 interface AllocInputProps {
   label: string;
   description: string;
-  formula: string;
   raw: string;
   onRawChange: (v: string) => void;
   currentIndex: number;
@@ -30,7 +29,7 @@ interface AllocInputProps {
   maxM: number;
 }
 
-function AllocInput({ label, description, formula, raw, onRawChange, currentIndex, newIndex, maxM }: AllocInputProps) {
+function AllocInput({ label, description, raw, onRawChange, currentIndex, newIndex, maxM }: AllocInputProps) {
   const indexColor = newIndex >= 7 ? "#22c55e" : newIndex >= 4 ? "#f59e0b" : "#dc2626";
   const pct = (newIndex / 10) * 100;
 
@@ -49,7 +48,6 @@ function AllocInput({ label, description, formula, raw, onRawChange, currentInde
         <span className="text-amber-400 text-[14px] tracking-widest uppercase" style={{ fontFamily: "var(--font-pixel), monospace" }}>
           ■ {label}
         </span>
-        <span className="text-[13px] font-mono text-gray-500">{formula}</span>
       </div>
       <p className="text-gray-500 text-[13px] font-mono">{description}</p>
 
@@ -153,7 +151,6 @@ export default function InvestmentScreen({
       <AllocInput
         label="CAR DEVELOPMENT"
         description="Improves car performance on track."
-        formula="index += investment ÷ 10M"
         raw={carDevRaw}
         onRawChange={setCarDevRaw}
         currentIndex={currentCarDev}
@@ -164,7 +161,6 @@ export default function InvestmentScreen({
       <AllocInput
         label="STAFF QUALITY"
         description="Better engineers improve car performance and race strategy."
-        formula="index += investment ÷ 10M"
         raw={staffRaw}
         onRawChange={setStaffRaw}
         currentIndex={currentStaff}
@@ -175,7 +171,6 @@ export default function InvestmentScreen({
       <AllocInput
         label="PUBLIC IMAGE"
         description="Increases sponsor contract probability before each race."
-        formula="index += investment ÷ 12M"
         raw={imageRaw}
         onRawChange={setImageRaw}
         currentIndex={currentImage}
