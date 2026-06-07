@@ -58,7 +58,7 @@ export default function TeamSetup({ onConfirm }: TeamSetupProps) {
         }}
       >
         <p className="text-amber-300 text-[14px] font-mono leading-relaxed">
-          You have been appointed as the new team principal of a struggling racing team. The board gives you 100M G and one season to stabilize the team.
+          Rararacing is about to go bankrupt. Nobody wants to sail the sinking ship. Your friend from its executives board is begging for a favor — take over team principal's role and lead the boat out of the storm.
         </p>
       </div>
 
