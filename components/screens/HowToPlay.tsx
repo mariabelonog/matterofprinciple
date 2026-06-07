@@ -153,7 +153,7 @@ export default function HowToPlay({ onBack }: HowToPlayProps) {
               { value: "Driver Input", weight: "10%", color: "#818cf8" },
               { value: "Strategy", weight: "30%", color: "#22c55e" },
             ],
-            note: "Budapest: driver 40%",
+            note: undefined,
           },
         ].map((row, i, arr) => (
           <div
