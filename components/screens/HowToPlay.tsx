@@ -33,7 +33,7 @@ const steps = [
   {
     num: "06",
     title: "SURVIVE CRISIS EVENTS",
-    body: "Races at Strassburg, Budapest, and Istanbul include a crisis event with three choices. Each choice shifts your budget, indices, or risk — applied before that race's calculation. There is no safe pick.",
+    body: "Some races will hit you with a crisis event and three hard choices. Each choice shifts your budget, indices, or risk — applied before that race's calculation. There is no safe pick.",
   },
   {
     num: "07",
