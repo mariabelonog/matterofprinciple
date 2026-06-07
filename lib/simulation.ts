@@ -44,8 +44,10 @@ export function calcDriverInput(driverIndex: number, riskWillingness: number): n
   return driverIndex * 0.6 + riskWillingness * 0.4;
 }
 
-export function calcRaceScore(carPerformance: number, driverInput: number, strategy: number): number {
-  return carPerformance * 0.6 + driverInput * 0.1 + strategy * 0.3;
+export function calcRaceScore(carPerformance: number, driverInput: number, strategy: number, driverWeight = 0.1): number {
+  const carWeight = 0.6 - (driverWeight - 0.1) / 2;
+  const stratWeight = 1 - carWeight - driverWeight;
+  return carPerformance * carWeight + driverInput * driverWeight + strategy * stratWeight;
 }
 
 export function calcPosition(playerScore: number, opponentScores: number[]): number {
@@ -88,6 +90,7 @@ export function runRace(
   opponentScores: number[],
   effectiveRisk: number,  // riskWillingness + crisisRiskModifier, clamped 0–10
   driverBoost = 0,
+  driverWeight = 0.1,     // Budapest passes 0.4 here
 ): Omit<RaceResult, "narrative"> & { carPerformance: number; strategy: number; driverInput: number } {
   if (!state.driver) throw new Error("No driver selected");
   const { carDevelopment, staffQuality } = state;
@@ -96,7 +99,7 @@ export function runRace(
   const carPerformance = calcCarPerformance(carDevelopment, staffQuality);
   const strategy = calcStrategy(staffQuality, effectiveRisk);
   const driverInput = calcDriverInput(driverIndex, effectiveRisk);
-  const raceScore = calcRaceScore(carPerformance, driverInput, strategy);
+  const raceScore = calcRaceScore(carPerformance, driverInput, strategy, driverWeight);
   const position = calcPosition(raceScore, opponentScores);
 
   return { carPerformance, strategy, driverInput, raceScore, position };

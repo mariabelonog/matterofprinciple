@@ -527,7 +527,8 @@ export default function RaceScreen({ race, state, onStateChange, onRaceComplete,
 
   function handleRunRace() {
     const effectiveRisk = Math.min(10, Math.max(0, state.riskWillingness + crisisRiskModifier));
-    const raceData = runRace(state, race.opponentScores, effectiveRisk, driverBoost);
+    const driverWeight = race.city === "Budapest" ? 0.4 : 0.1;
+    const raceData = runRace(state, race.opponentScores, effectiveRisk, driverBoost, driverWeight);
     const crashData = rollCrash(
       effectiveRisk,
       state.lastCarInvestment,
