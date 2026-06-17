@@ -362,6 +362,79 @@ function CityCard({ race }: { race: Race }) {
   );
 }
 
+// ─── Race standings table ─────────────────────────────────────────────────────
+
+interface StandingsEntry {
+  pos: number;
+  name: string;
+  score: number;
+  dnf: boolean;
+  isPlayer: boolean;
+}
+
+function RaceStandings({ playerName, result }: { playerName: string; result: ExtendedRaceResult }) {
+  const playerEntry: StandingsEntry = {
+    pos: result.position,
+    name: playerName, // city reused as placeholder; caller passes teamName below
+    score: result.raceScore,
+    dnf: result.dnf,
+    isPlayer: true,
+  };
+
+  const rivalEntries: StandingsEntry[] = result.rivalResults.map((r) => ({
+    pos: 0, // computed after sorting
+    name: r.teamName,
+    score: r.score,
+    dnf: r.dnf,
+    isPlayer: false,
+  }));
+
+  // Sort all entries: DNF goes last, others by score descending
+  const all: StandingsEntry[] = [playerEntry, ...rivalEntries].sort((a, b) => {
+    if (a.dnf && !b.dnf) return 1;
+    if (!a.dnf && b.dnf) return -1;
+    return b.score - a.score;
+  });
+  all.forEach((e, i) => { e.pos = e.dnf ? 10 : i + 1; });
+
+  return (
+    <div
+      className="w-full p-4 flex flex-col gap-2"
+      style={{ border: "3px solid #374151", boxShadow: "4px 4px 0px #111827", backgroundColor: "#0d0d0d" }}
+    >
+      <span
+        className="text-amber-400 text-[12px] tracking-widest uppercase mb-1"
+        style={{ fontFamily: "var(--font-pixel), monospace" }}
+      >
+        ■ RACE STANDINGS
+      </span>
+      {all.map((entry, i) => {
+        const posColor = entry.dnf ? "#dc2626" : entry.pos <= 3 ? "#22c55e" : entry.pos <= 6 ? "#f59e0b" : "#6b7280";
+        return (
+          <div
+            key={i}
+            className="flex items-center gap-3 py-1"
+            style={entry.isPlayer ? { borderLeft: "3px solid #dc2626", paddingLeft: "8px" } : { paddingLeft: "11px" }}
+          >
+            <span className="text-[12px] font-mono w-8 shrink-0" style={{ color: posColor }}>
+              {entry.dnf ? "DNF" : `P${entry.pos}`}
+            </span>
+            <span
+              className="text-[13px] font-mono flex-1 truncate"
+              style={{ color: entry.isPlayer ? "#ffffff" : "#9ca3af" }}
+            >
+              {entry.name}
+            </span>
+            <span className="text-[12px] font-mono shrink-0" style={{ color: entry.isPlayer ? "#e5e7eb" : "#6b7280" }}>
+              {entry.dnf ? "—" : entry.score.toFixed(3)}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Result panel (extended) ──────────────────────────────────────────────────
 
 function positionColor(pos: number): string {
@@ -382,10 +455,11 @@ function StatRow({ label, value }: { label: string; value: number }) {
 interface ResultPanelProps {
   result: ExtendedRaceResult;
   nextCity: string | null; // null means final race
+  playerTeamName: string;
   onContinue: () => void;
 }
 
-function ExtendedResultPanel({ result, nextCity, onContinue }: ResultPanelProps) {
+function ExtendedResultPanel({ result, nextCity, playerTeamName, onContinue }: ResultPanelProps) {
   const color = result.dnf ? "#dc2626" : positionColor(result.position);
   const posLabel = result.dnf ? "RETIRED" : result.position === 1 ? "VICTORY" : result.position <= 3 ? "PODIUM" : "FINISH";
   const shadowColor = result.dnf ? "#7f1d1d" : result.position <= 3 ? "#166534" : result.position <= 6 ? "#78350f" : "#7f1d1d";
@@ -481,6 +555,11 @@ function ExtendedResultPanel({ result, nextCity, onContinue }: ResultPanelProps)
       >
         <p className="text-gray-300 text-[15px] font-mono leading-relaxed">{result.narrative}</p>
       </div>
+
+      {/* Race standings */}
+      {result.rivalResults.length > 0 && (
+        <RaceStandings playerName={playerTeamName} result={result} />
+      )}
 
       {/* Continue button */}
       <button
@@ -580,6 +659,7 @@ export default function RaceScreen({ race, state, onStateChange, onRaceComplete,
       prizeMoneyEarned: sim.prizeMoneyEarned,
       dnf: sim.playerDnf,
       reliabilityAfter: sim.reliabilityAfter,
+      rivalResults: sim.rivalResults,
     };
 
     setRaceResult(result);
@@ -657,6 +737,7 @@ export default function RaceScreen({ race, state, onStateChange, onRaceComplete,
         <ExtendedResultPanel
           result={raceResult}
           nextCity={nextCityLabel}
+          playerTeamName={state.teamName}
           onContinue={onContinue}
         />
       )}

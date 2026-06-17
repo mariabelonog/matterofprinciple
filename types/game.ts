@@ -87,4 +87,5 @@ export interface ExtendedRaceResult extends RaceResult {
   prizeMoneyEarned: number;    // position-based prize from simulationEngine
   dnf: boolean;                // true if car retired before finish
   reliabilityAfter: number;    // carReliability value after this race
+  rivalResults: { rivalId: string; teamName: string; score: number; dnf: boolean }[];
 }
