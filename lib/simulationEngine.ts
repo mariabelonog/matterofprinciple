@@ -48,15 +48,15 @@ export const PRIZE_MONEY: Record<number, number> = {
 // ─── Rival system ────────────────────────────────────────────────────────────
 
 const RIVAL_TEMPLATES: Omit<Rival, "reliability">[] = [
-  { id: "vortex",   teamName: "Vortex Motorsport",  basePerformance: 6.5, developmentRate: 0.15, budget: 120_000_000 },
-  { id: "ironclad", teamName: "Ironclad Racing",    basePerformance: 5.2, developmentRate: 0.20, budget:  90_000_000 },
-  { id: "aether",   teamName: "Aether Works",       basePerformance: 7.1, developmentRate: 0.10, budget: 150_000_000 },
-  { id: "pascal",   teamName: "Équipe Pascal",      basePerformance: 4.8, developmentRate: 0.25, budget:  70_000_000 },
-  { id: "zephyr",   teamName: "Zephyr Grand Prix",  basePerformance: 6.0, developmentRate: 0.12, budget: 100_000_000 },
-  { id: "colossus", teamName: "Colossus Racing",    basePerformance: 5.8, developmentRate: 0.18, budget:  85_000_000 },
-  { id: "nocturne", teamName: "Nocturne Speed",     basePerformance: 4.5, developmentRate: 0.30, budget:  65_000_000 },
-  { id: "tempest",  teamName: "Tempest Auto",       basePerformance: 7.5, developmentRate: 0.08, budget: 200_000_000 },
-  { id: "meridian", teamName: "Meridian Motors",    basePerformance: 5.5, developmentRate: 0.22, budget:  80_000_000 },
+  { id: "achilles",   teamName: "Achilles Racing",       basePerformance: 7.5, developmentRate: 0.08, budget: 200_000_000 },
+  { id: "hector",     teamName: "Hector Motorsport",     basePerformance: 6.5, developmentRate: 0.15, budget: 120_000_000 },
+  { id: "odysseus",   teamName: "Odysseus Grand Prix",   basePerformance: 6.0, developmentRate: 0.18, budget: 100_000_000 },
+  { id: "ajax",       teamName: "Ajax Speed Works",      basePerformance: 7.1, developmentRate: 0.10, budget: 150_000_000 },
+  { id: "diomedes",   teamName: "Diomedes Auto",         basePerformance: 5.8, developmentRate: 0.20, budget:  85_000_000 },
+  { id: "patroclus",  teamName: "Patroclus Racing",      basePerformance: 5.2, developmentRate: 0.22, budget:  80_000_000 },
+  { id: "menelaus",   teamName: "Menelaus Motorsport",   basePerformance: 5.5, developmentRate: 0.12, budget:  90_000_000 },
+  { id: "agamemnon",  teamName: "Agamemnon Works",       basePerformance: 4.8, developmentRate: 0.25, budget:  70_000_000 },
+  { id: "paris",      teamName: "Paris Écurie",          basePerformance: 4.5, developmentRate: 0.30, budget:  65_000_000 },
 ];
 
 /** Create the 9 rival teams at season start. */
