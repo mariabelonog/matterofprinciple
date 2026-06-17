@@ -3,7 +3,8 @@
 import { useState } from "react";
 import type { Race, GameState, ExtendedRaceResult, CrisisChoice } from "@/types/game";
 import { CRISIS_EVENTS } from "@/lib/crisisEvents";
-import { runRace, rollSponsor, rollCrash, buildRaceNarrative } from "@/lib/simulation";
+import { buildRaceNarrative } from "@/lib/simulation";
+import { simulateRace, rollSponsorSeeded } from "@/lib/simulationEngine";
 import TeamStatusPanel from "@/components/ui/TeamStatusPanel";
 import RiskSelector from "@/components/ui/RiskSelector";
 import SponsorUpdate from "@/components/ui/SponsorUpdate";
@@ -385,9 +386,9 @@ interface ResultPanelProps {
 }
 
 function ExtendedResultPanel({ result, nextCity, onContinue }: ResultPanelProps) {
-  const color = positionColor(result.position);
-  const posLabel = result.position === 1 ? "VICTORY" : result.position <= 3 ? "PODIUM" : "FINISH";
-  const shadowColor = result.position <= 3 ? "#166534" : result.position <= 6 ? "#78350f" : "#7f1d1d";
+  const color = result.dnf ? "#dc2626" : positionColor(result.position);
+  const posLabel = result.dnf ? "RETIRED" : result.position === 1 ? "VICTORY" : result.position <= 3 ? "PODIUM" : "FINISH";
+  const shadowColor = result.dnf ? "#7f1d1d" : result.position <= 3 ? "#166534" : result.position <= 6 ? "#78350f" : "#7f1d1d";
 
   return (
     <div className="w-full flex flex-col gap-6">
@@ -396,40 +397,44 @@ function ExtendedResultPanel({ result, nextCity, onContinue }: ResultPanelProps)
         className="w-full flex flex-col items-center py-8 gap-2"
         style={{ border: `3px solid ${color}`, boxShadow: `4px 4px 0px ${shadowColor}`, backgroundColor: "#111111" }}
       >
-        <span className="text-[56px] font-bold font-mono" style={{ color }}>P{result.position}</span>
+        <span className="text-[56px] font-bold font-mono" style={{ color }}>
+          {result.dnf ? "DNF" : `P${result.position}`}
+        </span>
         <span className="text-[14px] tracking-widest uppercase" style={{ fontFamily: "var(--font-pixel), monospace", color }}>
           {posLabel}
         </span>
       </div>
 
-      {/* Finance summary */}
-      {(result.sponsorIncome > 0 || result.crashLosses > 0) && (
-        <div
-          className="w-full p-4 flex flex-col gap-2"
-          style={{ border: "3px solid #374151", boxShadow: "4px 4px 0px #111827", backgroundColor: "#111111" }}
-        >
-          <span className="text-amber-400 text-[12px] tracking-widest uppercase mb-1" style={{ fontFamily: "var(--font-pixel), monospace" }}>
-            ■ RACE FINANCES
-          </span>
-          {result.sponsorIncome > 0 && (
-            <div className="flex justify-between">
-              <span className="text-gray-400 text-[13px] font-mono">Sponsor income</span>
-              <span className="text-green-400 text-[13px] font-mono font-bold">+{(result.sponsorIncome / 1_000_000).toFixed(1)}M G</span>
-            </div>
-          )}
-          {result.crashLosses > 0 && (
-            <div className="flex justify-between">
-              <span className="text-gray-400 text-[13px] font-mono">Crash losses</span>
-              <span className="text-red-400 text-[13px] font-mono font-bold">-{(result.crashLosses / 1_000_000).toFixed(1)}M G</span>
-            </div>
-          )}
-          <div className="border-t border-[#333] my-1" />
-          <div className="flex justify-between">
-            <span className="text-gray-400 text-[13px] font-mono">Budget after</span>
-            <span className="text-white text-[13px] font-mono font-bold">{(result.budgetAfter / 1_000_000).toFixed(1)}M G</span>
-          </div>
+      {/* Finance summary — always shown now that prize money exists */}
+      <div
+        className="w-full p-4 flex flex-col gap-2"
+        style={{ border: "3px solid #374151", boxShadow: "4px 4px 0px #111827", backgroundColor: "#111111" }}
+      >
+        <span className="text-amber-400 text-[12px] tracking-widest uppercase mb-1" style={{ fontFamily: "var(--font-pixel), monospace" }}>
+          ■ RACE FINANCES
+        </span>
+        <div className="flex justify-between">
+          <span className="text-gray-400 text-[13px] font-mono">Prize money (P{result.position})</span>
+          <span className="text-green-400 text-[13px] font-mono font-bold">+{(result.prizeMoneyEarned / 1_000_000).toFixed(0)}M G</span>
         </div>
-      )}
+        {result.sponsorIncome > 0 && (
+          <div className="flex justify-between">
+            <span className="text-gray-400 text-[13px] font-mono">Sponsor income</span>
+            <span className="text-green-400 text-[13px] font-mono font-bold">+{(result.sponsorIncome / 1_000_000).toFixed(1)}M G</span>
+          </div>
+        )}
+        {result.crashLosses > 0 && (
+          <div className="flex justify-between">
+            <span className="text-gray-400 text-[13px] font-mono">Crash losses</span>
+            <span className="text-red-400 text-[13px] font-mono font-bold">-{(result.crashLosses / 1_000_000).toFixed(1)}M G</span>
+          </div>
+        )}
+        <div className="border-t border-[#333] my-1" />
+        <div className="flex justify-between">
+          <span className="text-gray-400 text-[13px] font-mono">Budget after</span>
+          <span className="text-white text-[13px] font-mono font-bold">{(result.budgetAfter / 1_000_000).toFixed(1)}M G</span>
+        </div>
+      </div>
 
       {/* Crisis narrative */}
       {result.crisisNarrative && (
@@ -457,6 +462,16 @@ function ExtendedResultPanel({ result, nextCity, onContinue }: ResultPanelProps)
         <StatRow label="Driver Input" value={result.driverInput} />
         <div className="border-t border-[#333] my-1" />
         <StatRow label="Race Score" value={result.raceScore} />
+        <div className="border-t border-[#333] my-1" />
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-gray-400 text-[13px] font-mono tracking-widest uppercase">Reliability</span>
+          <span
+            className="text-[14px] font-mono"
+            style={{ color: result.reliabilityAfter >= 7 ? "#22c55e" : result.reliabilityAfter >= 4 ? "#f59e0b" : "#dc2626" }}
+          >
+            {result.reliabilityAfter.toFixed(2)}
+          </span>
+        </div>
       </div>
 
       {/* Narrative */}
@@ -487,8 +502,10 @@ export default function RaceScreen({ race, state, onStateChange, onRaceComplete,
   const initialPhase: Phase = "sponsor";
 
   const [phase, setPhase] = useState<Phase>(initialPhase);
-  // Roll sponsor once when component mounts (React strict mode runs twice in dev, but result is stored)
-  const [sponsorResult] = useState(() => rollSponsor(state.publicImage));
+  // Roll sponsor using the seeded PRNG so it's reproducible and consistent with simulateRace
+  const [sponsorResult] = useState(() =>
+    rollSponsorSeeded(state.seasonSeed, race.round, state.publicImage),
+  );
   const [crisisRiskModifier, setCrisisRiskModifier] = useState(0);
   const [crashLossMultiplier, setCrashLossMultiplier] = useState(1);
   const [driverBoost, setDriverBoost] = useState(0);
@@ -528,29 +545,41 @@ export default function RaceScreen({ race, state, onStateChange, onRaceComplete,
   function handleRunRace() {
     const effectiveRisk = Math.min(10, Math.max(0, state.riskWillingness + crisisRiskModifier));
     const driverWeight = race.city === "Budapest" ? 0.4 : 0.1;
-    const raceData = runRace(state, race.opponentScores, effectiveRisk, driverBoost, driverWeight);
-    const crashData = rollCrash(
-      effectiveRisk,
-      state.lastCarInvestment,
-      state.previousCarInvestment,
-      crashLossMultiplier,
-    );
-    const narrative = buildRaceNarrative(race.city, raceData.position);
 
-    // Budget after = current budget + sponsorIncome - crashLosses
-    // Note: crisis budget deltas already applied via onStateChange
-    const budgetAfter = state.budget + sponsorResult.income - crashData.losses;
+    const sim = simulateRace(
+      state,
+      race,
+      effectiveRisk,
+      driverBoost,
+      crashLossMultiplier,
+      driverWeight,
+    );
+
+    const narrative = sim.playerDnf
+      ? `DNF in ${race.city}. Mechanical failure ended the race early. The car is badly damaged.`
+      : buildRaceNarrative(race.city, sim.position);
+
+    // Crisis budget deltas were already applied via onStateChange before this runs
+    const budgetAfter =
+      state.budget + sim.prizeMoneyEarned + sim.sponsorIncome - sim.crashLosses;
 
     const result: ExtendedRaceResult = {
-      ...raceData,
+      carPerformance: sim.carPerformance,
+      strategy: sim.strategy,
+      driverInput: sim.driverInput,
+      raceScore: sim.playerScore,
+      position: sim.position,
       narrative,
       raceNumber: race.round,
       city: race.city,
-      sponsorIncome: sponsorResult.income,
-      crashLosses: crashData.losses,
+      sponsorIncome: sim.sponsorIncome,
+      crashLosses: sim.crashLosses,
       budgetAfter,
       crisisChoiceId,
       crisisNarrative,
+      prizeMoneyEarned: sim.prizeMoneyEarned,
+      dnf: sim.playerDnf,
+      reliabilityAfter: sim.reliabilityAfter,
     };
 
     setRaceResult(result);

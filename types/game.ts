@@ -1,3 +1,12 @@
+export interface Rival {
+  id: string;
+  teamName: string;
+  basePerformance: number;   // 0–10
+  developmentRate: number;   // performance gained per race round
+  budget: number;            // in G
+  reliability: number;       // 0–10
+}
+
 export interface Driver {
   id: string;
   name: string;
@@ -18,6 +27,9 @@ export interface GameState {
   lastCarInvestment: number;    // in G, default 0
   previousCarInvestment: number; // in G, default 0
   raceHistory: ExtendedRaceResult[];
+  seasonSeed: number;           // PRNG seed, fixed for the whole season
+  carReliability: number;       // 0–10, degrades with risk and age
+  rivals: Rival[];              // 9 autonomous rival teams
 }
 
 export interface RaceResult {
@@ -72,4 +84,7 @@ export interface ExtendedRaceResult extends RaceResult {
   budgetAfter: number;
   crisisChoiceId?: string; // which crisis choice was made
   crisisNarrative?: string;
+  prizeMoneyEarned: number;    // position-based prize from simulationEngine
+  dnf: boolean;                // true if car retired before finish
+  reliabilityAfter: number;    // carReliability value after this race
 }

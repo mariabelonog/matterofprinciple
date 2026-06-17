@@ -13,7 +13,8 @@ import Dashboard from "@/components/screens/Dashboard";
 import CrisisCard from "@/components/screens/CrisisCard";
 import SeasonResult from "@/components/screens/SeasonResult";
 import { seasonResult } from "@/data/mockData";
-import { applyInvestment, INVESTMENT_DIVISORS } from "@/lib/simulation";
+import { INVESTMENT_DIVISORS } from "@/lib/simulation";
+import { applyUpgrades, generateRivals, updateRivals } from "@/lib/simulationEngine";
 import { RACES } from "@/lib/races";
 import type { GameState, Driver, BudgetAllocation, ExtendedRaceResult } from "@/types/game";
 
@@ -42,6 +43,9 @@ const INITIAL_STATE: GameState = {
   lastCarInvestment: 0,
   previousCarInvestment: 0,
   raceHistory: [],
+  seasonSeed: 0,
+  carReliability: 10,
+  rivals: [],
 };
 
 export default function Home() {
@@ -55,7 +59,12 @@ export default function Home() {
   }
 
   function handleTeamConfirm(name: string) {
-    patchState({ teamName: name });
+    patchState({
+      teamName: name,
+      // Fresh seed each new game; fixed for the whole season so strategies are comparable
+      seasonSeed: Date.now() & 0xffffffff,
+      rivals: generateRivals(),
+    });
     setCurrentScreen("driverselection");
   }
 
@@ -70,9 +79,9 @@ export default function Home() {
   function handleBudgetConfirm(alloc: BudgetAllocation) {
     const totalInvested = alloc.carDevelopment + alloc.staffQuality + alloc.publicImage;
     patchState({
-      carDevelopment: applyInvestment(gameState.carDevelopment, alloc.carDevelopment, INVESTMENT_DIVISORS.carDevelopment),
-      staffQuality:   applyInvestment(gameState.staffQuality, alloc.staffQuality, INVESTMENT_DIVISORS.staffQuality),
-      publicImage:    applyInvestment(gameState.publicImage, alloc.publicImage, INVESTMENT_DIVISORS.publicImage),
+      carDevelopment: applyUpgrades(gameState.carDevelopment, alloc.carDevelopment, 0.7, INVESTMENT_DIVISORS.carDevelopment),
+      staffQuality:   applyUpgrades(gameState.staffQuality, alloc.staffQuality, 0.7, INVESTMENT_DIVISORS.staffQuality),
+      publicImage:    applyUpgrades(gameState.publicImage, alloc.publicImage, 0.7, INVESTMENT_DIVISORS.publicImage),
       budget: gameState.budget - totalInvested,
       lastCarInvestment: alloc.carDevelopment,
       previousCarInvestment: 0,
@@ -84,10 +93,12 @@ export default function Home() {
   // Called by RaceScreen when race finishes — applies budget changes, stores result
   function handleRaceComplete(result: ExtendedRaceResult) {
     setGameState((prev) => {
-      const newBudget = prev.budget + result.sponsorIncome - result.crashLosses;
+      const newBudget =
+        prev.budget + result.prizeMoneyEarned + result.sponsorIncome - result.crashLosses;
       return {
         ...prev,
         budget: newBudget,
+        carReliability: result.reliabilityAfter,
         raceHistory: [...prev.raceHistory, { ...result, budgetAfter: newBudget }],
       };
     });
@@ -115,14 +126,14 @@ export default function Home() {
     const totalInvested = alloc.carDevelopment + alloc.staffQuality + alloc.publicImage;
     setGameState((prev) => ({
       ...prev,
-      carDevelopment: applyInvestment(prev.carDevelopment, alloc.carDevelopment, INVESTMENT_DIVISORS.carDevelopment),
-      staffQuality:   applyInvestment(prev.staffQuality, alloc.staffQuality, INVESTMENT_DIVISORS.staffQuality),
-      publicImage:    applyInvestment(prev.publicImage, alloc.publicImage, INVESTMENT_DIVISORS.publicImage),
+      carDevelopment: applyUpgrades(prev.carDevelopment, alloc.carDevelopment, 0.7, INVESTMENT_DIVISORS.carDevelopment),
+      staffQuality:   applyUpgrades(prev.staffQuality, alloc.staffQuality, 0.7, INVESTMENT_DIVISORS.staffQuality),
+      publicImage:    applyUpgrades(prev.publicImage, alloc.publicImage, 0.7, INVESTMENT_DIVISORS.publicImage),
       budget: prev.budget - totalInvested,
-      // Shift car investment history for crash calculation
       previousCarInvestment: prev.lastCarInvestment,
       lastCarInvestment: alloc.carDevelopment,
       currentRace: prev.currentRace + 1,
+      rivals: updateRivals(prev.rivals),
     }));
     setCurrentScreen("race");
   }
