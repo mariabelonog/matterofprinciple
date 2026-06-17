@@ -623,7 +623,7 @@ export default function RaceScreen({ race, state, onStateChange, onRaceComplete,
 
   function handleRunRace() {
     const effectiveRisk = Math.min(10, Math.max(0, state.riskWillingness + crisisRiskModifier));
-    const driverWeight = race.city === "Budapest" ? 0.4 : 0.1;
+    const driverWeight = race.city === "Budapest" ? 0.5 : 0.25;
 
     const sim = simulateRace(
       state,
