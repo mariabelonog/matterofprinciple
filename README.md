@@ -1,6 +1,6 @@
 # Matter of Principle
 
-[Посмотреть рекламную брошюру](https://mariabelonog.github.io/matterofprinciple/brochure.html)
+[Посмотреть рекламную брошюру](https://mariabelonog.github.io/matterofprinciple/brochure)
 
 **[▶ Играть](https://matterofprinciple.vercel.app)**
 
