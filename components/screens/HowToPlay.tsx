@@ -42,11 +42,16 @@ const steps = [
   },
   {
     num: "07",
+    title: "BE IN TOUCH WITH THE DATA",
+    body: "Learn a little about each city following the route of the famous Orient Express and keep track of your team's KPIs!",
+  },
+  {
+    num: "08",
     title: "SURVIVE CRISIS EVENTS",
     body: "Some races will hit you with a crisis event and three hard choices. Each choice shifts your budget, indices, or risk — applied before that race's calculation. There is no safe pick.",
   },
   {
-    num: "08",
+    num: "09",
     title: "SURVIVE THE SEASON",
     body: "Reach Istanbul without going bankrupt. Your final score is based on average race position, remaining budget, and public image. Survival is the win — your ranking is the legacy.",
   },
