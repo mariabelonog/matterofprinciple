@@ -86,6 +86,7 @@ matterofprinciple/
     └── game.ts           — все TypeScript-интерфейсы: GameState, Driver,
                             Race, CrisisEvent, RaceResult и др.
 
+```
 ### Архитектура
 
 `app/page.tsx` — единственный владелец состояния (`GameState`). Экраны — чистые компоненты, получают данные через пропсы и возвращают события через колбэки. Бизнес-логика не живёт в компонентах.
