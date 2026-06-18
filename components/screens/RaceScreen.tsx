@@ -9,6 +9,7 @@ import TeamStatusPanel from "@/components/ui/TeamStatusPanel";
 import RiskSelector from "@/components/ui/RiskSelector";
 import SponsorUpdate from "@/components/ui/SponsorUpdate";
 import CrisisPanel from "@/components/ui/CrisisPanel";
+import RouteMapModal from "@/components/ui/RouteMapModal";
 
 interface Props {
   race: Race;
@@ -24,11 +25,13 @@ type Phase = "sponsor" | "crisis" | "setup" | "result";
 
 const ROUTE = ["Paris","Strassburg","Stuttgart","Vienna","Budapest","Bucharest","Sinaia","Istanbul"];
 
-function OrientExpressRoute({ currentRound }: { currentRound: number }) {
+function OrientExpressRoute({ currentRound, onOpenMap }: { currentRound: number; onOpenMap: () => void }) {
   return (
     <div
-      className="w-full p-4 flex flex-col gap-3"
+      className="w-full p-4 flex flex-col gap-3 cursor-pointer"
       style={{ border: "3px solid #78350f", boxShadow: "4px 4px 0px #1c1000", backgroundColor: "#0a0600" }}
+      onClick={onOpenMap}
+      title="Open economic map"
     >
       {/* Label */}
       <div className="flex items-center gap-2">
@@ -38,6 +41,7 @@ function OrientExpressRoute({ currentRound }: { currentRound: number }) {
         >
           ▶ ORIENT EXPRESS CIRCUIT
         </span>
+        <span className="text-[10px] font-mono text-amber-900 ml-auto">TAP FOR MAP ↗</span>
         <div className="flex-1 h-[1px] bg-amber-900 opacity-40" />
         <span className="text-amber-900 text-[11px] font-mono">SEASON 01</span>
       </div>
@@ -581,6 +585,8 @@ export default function RaceScreen({ race, state, onStateChange, onRaceComplete,
   const initialPhase: Phase = "sponsor";
 
   const [phase, setPhase] = useState<Phase>(initialPhase);
+  const [mapOpen, setMapOpen] = useState(false);
+
   // Roll sponsor using the seeded PRNG so it's reproducible and consistent with simulateRace
   const [sponsorResult] = useState(() =>
     rollSponsorSeeded(state.seasonSeed, race.round, state.publicImage),
@@ -682,8 +688,11 @@ export default function RaceScreen({ race, state, onStateChange, onRaceComplete,
         ▶ RACE {race.round} — {race.city.toUpperCase()}
       </div>
 
-      {/* Orient Express route strip */}
-      <OrientExpressRoute currentRound={race.round} />
+      {/* Orient Express route strip — click to open economic map */}
+      <OrientExpressRoute currentRound={race.round} onOpenMap={() => setMapOpen(true)} />
+      {mapOpen && (
+        <RouteMapModal currentRound={race.round} onClose={() => setMapOpen(false)} />
+      )}
 
       {/* City card always visible */}
       <CityCard race={race} />
