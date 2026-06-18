@@ -1,5 +1,12 @@
 "use client";
 
+// RaceScreen — главный игровой экран, управляющий четырьмя фазами одной гонки:
+//   1. sponsor — показ результата спонсорского контракта
+//   2. crisis  — кризисное событие (только на кризисных трассах)
+//   3. setup   — выбор риска и запуск гонки
+//   4. result  — отображение результатов
+// При каждой новой гонке компонент полностью ремаунтится (key в page.tsx) для сброса состояния.
+
 import { useState } from "react";
 import type { Race, GameState, ExtendedRaceResult, CrisisChoice } from "@/types/game";
 import { CRISIS_EVENTS } from "@/lib/crisisEvents";
@@ -11,14 +18,16 @@ import SponsorUpdate from "@/components/ui/SponsorUpdate";
 import CrisisPanel from "@/components/ui/CrisisPanel";
 import RouteMapModal from "@/components/ui/RouteMapModal";
 
+// Пропсы экрана гонки.
 interface Props {
-  race: Race;
-  state: GameState;
-  onStateChange: (patch: Partial<GameState>) => void;
-  onRaceComplete: (result: ExtendedRaceResult) => void;
-  onContinue: () => void; // called when user clicks continue after seeing result
+  race: Race;                                          // данные текущей гонки из RACES
+  state: GameState;                                    // текущее состояние игры
+  onStateChange: (patch: Partial<GameState>) => void;  // патч состояния (кризисные дельты)
+  onRaceComplete: (result: ExtendedRaceResult) => void; // вызывается после запуска симуляции
+  onContinue: () => void;                              // вызывается при нажатии "продолжить" после результата
 }
 
+// Фазы прохождения одного гоночного экрана.
 type Phase = "sponsor" | "crisis" | "setup" | "result";
 
 // ─── Orient Express route strip ──────────────────────────────────────────────
@@ -580,23 +589,25 @@ function ExtendedResultPanel({ result, nextCity, playerTeamName, onContinue }: R
 
 // ─── Main RaceScreen ──────────────────────────────────────────────────────────
 
+// Главный компонент экрана гонки — управляет фазами и собирает итоговый результат.
 export default function RaceScreen({ race, state, onStateChange, onRaceComplete, onContinue }: Props) {
-  // Determine initial phase: crisis races start with sponsor, then crisis, then setup
+  // Все гонки начинаются с фазы спонсора (даже не-кризисные)
   const initialPhase: Phase = "sponsor";
 
-  const [phase, setPhase] = useState<Phase>(initialPhase);
-  const [mapOpen, setMapOpen] = useState(false);
+  const [phase, setPhase] = useState<Phase>(initialPhase);     // текущая фаза гонки
+  const [mapOpen, setMapOpen] = useState(false);               // открыто ли модальное окно карты
 
-  // Roll sponsor using the seeded PRNG so it's reproducible and consistent with simulateRace
+  // Спонсор рассчитывается один раз при ремаунте через ГПСЧ, чтобы совпадать с simulateRace
   const [sponsorResult] = useState(() =>
     rollSponsorSeeded(state.seasonSeed, race.round, state.publicImage),
   );
-  const [crisisRiskModifier, setCrisisRiskModifier] = useState(0);
-  const [crashLossMultiplier, setCrashLossMultiplier] = useState(1);
-  const [driverBoost, setDriverBoost] = useState(0);
-  const [crisisChoiceId, setCrisisChoiceId] = useState<string | undefined>(undefined);
-  const [crisisNarrative, setCrisisNarrative] = useState<string | undefined>(undefined);
-  const [raceResult, setRaceResult] = useState<ExtendedRaceResult | null>(null);
+  // Модификаторы от кризисного события — применяются к формулам только в этой гонке
+  const [crisisRiskModifier, setCrisisRiskModifier] = useState(0);  // добавляется к riskWillingness
+  const [crashLossMultiplier, setCrashLossMultiplier] = useState(1); // множитель потерь от аварии
+  const [driverBoost, setDriverBoost] = useState(0);                // временный бонус к driverIndex
+  const [crisisChoiceId, setCrisisChoiceId] = useState<string | undefined>(undefined);   // id выбранного варианта
+  const [crisisNarrative, setCrisisNarrative] = useState<string | undefined>(undefined); // текст кризисного итога
+  const [raceResult, setRaceResult] = useState<ExtendedRaceResult | null>(null); // результат после симуляции
 
   const crisisEvent = race.isCrisis ? CRISIS_EVENTS[race.city] : null;
 
@@ -608,14 +619,18 @@ export default function RaceScreen({ race, state, onStateChange, onRaceComplete,
     }
   }
 
+  // Обрабатывает выбор игрока в кризисном событии.
+  // Постоянные изменения (бюджет, индексы) применяются немедленно через onStateChange,
+  // а временные модификаторы гонки хранятся в локальном состоянии.
   function handleCrisisChoice(choice: CrisisChoice) {
-    // Apply permanent state changes immediately
+    // Собираем только поля, которые реально меняются, чтобы не перезаписывать остальные
     const patch: Partial<GameState> = {};
     if (choice.budgetDelta) patch.budget = state.budget + choice.budgetDelta;
+    // Math.min(10, Math.max(0, ...)) гарантирует что индексы остаются в диапазоне 0–10
     if (choice.carDevelopmentDelta) patch.carDevelopment = Math.min(10, Math.max(0, state.carDevelopment + choice.carDevelopmentDelta));
     if (choice.staffQualityDelta) patch.staffQuality = Math.min(10, Math.max(0, state.staffQuality + choice.staffQualityDelta));
     if (choice.publicImageDelta) patch.publicImage = Math.min(10, Math.max(0, state.publicImage + choice.publicImageDelta));
-    if (Object.keys(patch).length > 0) onStateChange(patch);
+    if (Object.keys(patch).length > 0) onStateChange(patch); // обновляем только если есть изменения
 
     // Race-only modifiers stored locally
     setCrisisRiskModifier(choice.riskModifier ?? 0);
@@ -627,8 +642,11 @@ export default function RaceScreen({ race, state, onStateChange, onRaceComplete,
     setPhase("setup");
   }
 
+  // Запускает симуляцию гонки, собирает ExtendedRaceResult и переходит в фазу result.
   function handleRunRace() {
+    // Суммируем базовый риск и кризисный модификатор, ограничивая диапазоном 0–10
     const effectiveRisk = Math.min(10, Math.max(0, state.riskWillingness + crisisRiskModifier));
+    // Будапешт — особая гонка с повышенным весом пилота (0.5 против 0.25 на других трассах)
     const driverWeight = race.city === "Budapest" ? 0.5 : 0.25;
 
     const sim = simulateRace(

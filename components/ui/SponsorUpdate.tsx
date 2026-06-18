@@ -1,18 +1,25 @@
 "use client";
 
+// SponsorUpdate — экран спонсорского уведомления (первая фаза каждой гонки).
+// Показывает, сработал ли спонсорский контракт и какой доход получен.
+// Результат уже вычислен ГПСЧ в RaceScreen — здесь только отображение.
+
+// Пропсы компонента спонсорского уведомления.
 interface Props {
-  income: number;   // 0 means no contract
-  publicImage: number;
-  onContinue: () => void;
+  income: number;          // доход от спонсора в G; 0 означает что контракт не сработал
+  publicImage: number;     // текущий индекс имиджа для отображения вероятности
+  onContinue: () => void;  // переход к следующей фазе (кризис или настройка)
 }
 
+// Форматирует сумму в G как строку вида "12.3M G".
 function formatG(n: number): string {
   return (n / 1_000_000).toFixed(1) + "M G";
 }
 
+// Рендерит карточку с результатом спонсорского контракта и кнопкой продолжения.
 export default function SponsorUpdate({ income, publicImage, onContinue }: Props) {
-  const hasSponsor = income > 0;
-  const probability = Math.round((publicImage / 10) * 100);
+  const hasSponsor = income > 0; // true если спонсор сработал в этой гонке
+  const probability = Math.round((publicImage / 10) * 100); // вероятность в % (publicImage / 10)
 
   return (
     <div className="w-full flex flex-col gap-6">

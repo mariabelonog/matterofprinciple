@@ -1,20 +1,25 @@
 "use client";
 
+// InvestmentScreen — экран инвестиций между гонками.
+// Показывается после каждой гонки кроме последней; здесь игрок улучшает команду перед следующей гонкой.
+// В отличие от BudgetAllocationScreen, здесь currentIndex начинается не с нуля.
+
 import { useState } from "react";
 import type { BudgetAllocation, ExtendedRaceResult, Driver } from "@/types/game";
 import { applyInvestment, INVESTMENT_DIVISORS } from "@/lib/simulation";
 import TeamKPIPanel from "@/components/ui/TeamKPIPanel";
 
+// Пропсы экрана инвестиций между гонками.
 interface Props {
-  raceNumber: number;
-  nextCity: string;
-  budget: number;
-  currentCarDev: number;
-  currentStaff: number;
-  currentImage: number;
-  raceHistory: ExtendedRaceResult[];
-  driver: Driver | null;
-  onConfirm: (alloc: BudgetAllocation) => void;
+  raceNumber: number;          // номер только что завершённой гонки (1–7)
+  nextCity: string;            // название следующего города (для заголовка)
+  budget: number;              // текущий бюджет после завершения предыдущей гонки
+  currentCarDev: number;       // текущий индекс carDevelopment
+  currentStaff: number;        // текущий индекс staffQuality
+  currentImage: number;        // текущий индекс publicImage
+  raceHistory: ExtendedRaceResult[]; // история для KPI-панели
+  driver: Driver | null;       // выбранный пилот (для KPI-панели)
+  onConfirm: (alloc: BudgetAllocation) => void; // вызывается с суммами инвестиций
 }
 
 function parseM(s: string): number {

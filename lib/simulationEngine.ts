@@ -17,21 +17,26 @@ import {
 
 // ─── Seeded PRNG ─────────────────────────────────────────────────────────────
 
-/** Mulberry32 — fast seeded PRNG returning values in [0, 1) */
+// Mulberry32 — быстрый ГПСЧ с фиксированным зерном, возвращает числа в диапазоне [0, 1).
+// Алгоритм использует побитовые операции и целочисленное умножение для высокого качества случайности.
+// 0x6d2b79f5 — константа смешивания (mixing constant), характерная для этого алгоритма.
+// >>> 0 приводит число к беззнаковому 32-битному целому, гарантируя корректность операций.
+// 4294967296 = 2^32 — делитель для нормализации результата в [0, 1).
 function mulberry32(seed: number): () => number {
-  let s = seed >>> 0;
+  let s = seed >>> 0; // инициализируем состояние как беззнаковое 32-битное число
   return () => {
-    s += 0x6d2b79f5;
+    s += 0x6d2b79f5;                              // шаг инкремента состояния
     let t = s;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    t = Math.imul(t ^ (t >>> 15), t | 1);         // первое перемешивание битов
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);    // второе перемешивание битов
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296; // финальная нормализация в [0, 1)
   };
 }
 
 // ─── Prize money ─────────────────────────────────────────────────────────────
 
-/** Prize money awarded per finishing position (in G) */
+// Таблица призовых выплат в G по финишным позициям (1 = победа).
+// P1 приносит 50M G, P10 — 1M G; всегда выплачивается хотя бы минимум.
 export const PRIZE_MONEY: Record<number, number> = {
   1:  50_000_000,
   2:  35_000_000,
@@ -47,6 +52,8 @@ export const PRIZE_MONEY: Record<number, number> = {
 
 // ─── Rival system ────────────────────────────────────────────────────────────
 
+// Шаблоны 9 соперников — вымышленные команды с именами из греческой мифологии.
+// reliability не включена в шаблон и добавляется единым значением в generateRivals().
 const RIVAL_TEMPLATES: Omit<Rival, "reliability">[] = [
   { id: "achilles",   teamName: "Achilles Racing",       basePerformance: 4.1, developmentRate: 0.08, budget: 200_000_000 },
   { id: "hector",     teamName: "Hector Motorsport",     basePerformance: 3.6, developmentRate: 0.15, budget: 120_000_000 },
@@ -59,32 +66,34 @@ const RIVAL_TEMPLATES: Omit<Rival, "reliability">[] = [
   { id: "paris",      teamName: "Paris Écurie",          basePerformance: 2.5, developmentRate: 0.30, budget:  65_000_000 },
 ];
 
-/** Create the 9 rival teams at season start. */
+// Создаёт 9 команд-соперников в начале сезона с единой начальной надёжностью 8.5.
 export function generateRivals(): Rival[] {
-  return RIVAL_TEMPLATES.map((t) => ({ ...t, reliability: 8.5 }));
+  return RIVAL_TEMPLATES.map((t) => ({ ...t, reliability: 8.5 })); // 8.5 — высокая надёжность в начале сезона
 }
 
 // ─── Race simulation ─────────────────────────────────────────────────────────
 
+// Результат одного соперника в гонке.
 export interface RivalRaceResult {
-  rivalId: string;
-  teamName: string;
-  score: number; // -1 means DNF
-  dnf: boolean;
+  rivalId: string;   // уникальный id для связи с объектом Rival
+  teamName: string;  // отображаемое название команды
+  score: number;     // числовой счёт; -1 означает DNF (сход с гонки)
+  dnf: boolean;      // true если соперник сошёл с трассы
 }
 
+// Полный вывод функции simulateRace — все данные для обновления состояния игры.
 export interface SimulateRaceOutput {
-  playerScore: number;
-  playerDnf: boolean;
-  rivalResults: RivalRaceResult[];
-  position: number;
-  prizeMoneyEarned: number;
-  sponsorIncome: number;
-  crashLosses: number;
-  carPerformance: number;
-  strategy: number;
-  driverInput: number;
-  reliabilityAfter: number;
+  playerScore: number;           // итоговый счёт игрока
+  playerDnf: boolean;            // сошёл ли игрок с гонки
+  rivalResults: RivalRaceResult[]; // результаты всех 9 соперников
+  position: number;              // финишная позиция игрока: 1–10
+  prizeMoneyEarned: number;      // призовые деньги по позиции
+  sponsorIncome: number;         // доход от спонсора (0 если не сработал)
+  crashLosses: number;           // потери от аварии в G
+  carPerformance: number;        // компонент производительности автомобиля
+  strategy: number;              // компонент стратегии
+  driverInput: number;           // компонент вклада пилота
+  reliabilityAfter: number;      // надёжность автомобиля после гонки
 }
 
 /**
@@ -123,48 +132,51 @@ export function simulateRace(
 ): SimulateRaceOutput {
   if (!state.driver) throw new Error("No driver selected");
 
+  // Пространство имён ГПСЧ для этой гонки: seed + round * 7919 (простое число для распределения)
   const rng = mulberry32(state.seasonSeed + race.round * 7919);
 
-  // Player performance components
+  // Вычисляем компоненты производительности игрока
   const carPerformance = calcCarPerformance(state.carDevelopment, state.staffQuality);
   const strategy = calcStrategy(state.staffQuality, effectiveRisk);
   const driverInput = calcDriverInput(
-    Math.min(10, state.driver.driverIndex + driverBoost),
+    Math.min(10, state.driver.driverIndex + driverBoost), // кризисный буст не превышает максимум 10
     effectiveRisk,
   );
   const playerScore = calcRaceScore(carPerformance, driverInput, strategy, driverWeight);
 
-  // DNF probability: risk amplifies unreliable cars
+  // Вероятность DNF: низкая надёжность + высокий риск = больше шансов сойти
+  // Формула: ((10 - reliability) / 20) * (risk / 10)
   const dnfProb = ((10 - state.carReliability) / 20) * (effectiveRisk / 10);
-  const playerDnf = rng() < dnfProb; // call #1
+  const playerDnf = rng() < dnfProb; // вызов ГПСЧ #1
 
-  // Reliability degrades each race from mechanical stress
+  // Надёжность снижается от механического стресса: базово 0.15 + 0.04 за единицу риска
   const reliabilityAfter = Math.max(0, state.carReliability - (0.15 + effectiveRisk * 0.04));
 
-  // Rival scores with seeded noise
+  // Результаты соперников с зашумлёнными баллами (детерминированы ГПСЧ)
   const rivalResults: RivalRaceResult[] = state.rivals.map((rival) => {
-    const developmentGain = rival.developmentRate * (race.round - 1);
-    const noise = (rng() - 0.5) * 0.8; // calls #2, 4, 6… (odd)
-    const score = Math.max(0, rival.basePerformance + developmentGain + noise);
-    const rivalDnf = rng() < (10 - rival.reliability) / 25; // calls #3, 5, 7… (even)
+    const developmentGain = rival.developmentRate * (race.round - 1); // накопленный прогресс за сезон
+    const noise = (rng() - 0.5) * 0.8; // шум ±0.4; вызовы #2, 4, 6… (нечётные)
+    const score = Math.max(0, rival.basePerformance + developmentGain + noise); // не ниже нуля
+    const rivalDnf = rng() < (10 - rival.reliability) / 25; // вызовы #3, 5, 7… (чётные)
     return {
       rivalId: rival.id,
       teamName: rival.teamName,
-      score: rivalDnf ? -1 : score,
+      score: rivalDnf ? -1 : score, // -1 означает DNF в таблице результатов
       dnf: rivalDnf,
     };
   });
 
-  // Position (DNF player scores -1, always at the back)
+  // Позиция: DNF-игрок получает -1, что всегда хуже любого соперника
   const effectiveScore = playerDnf ? -1 : playerScore;
+  // Math.min(10, ...) ограничивает позицию максимумом 10 участников
   const position = Math.min(10, rivalResults.filter((r) => r.score > effectiveScore).length + 1);
-  const prizeMoneyEarned = PRIZE_MONEY[position] ?? 1_000_000;
+  const prizeMoneyEarned = PRIZE_MONEY[position] ?? 1_000_000; // fallback на минимум при неизвестной позиции
 
-  // Sponsor (own namespace)
+  // Спонсор рассчитывается в своём пространстве имён (+1_000_000), не смешиваясь с гонкой
   const { income: sponsorIncome } = rollSponsorSeeded(state.seasonSeed, race.round, state.publicImage);
 
-  // Crash: skipped on DNF (car already retired)
-  const crashDidHappen = !playerDnf && rng() < effectiveRisk / 20; // call #20
+  // Авария пропускается если игрок уже сошёл — машина и так уничтожена
+  const crashDidHappen = !playerDnf && rng() < effectiveRisk / 20; // вызов ГПСЧ #20
   const crashLosses = crashDidHappen
     ? Math.round(
         (state.lastCarInvestment + state.previousCarInvestment) *
@@ -197,11 +209,11 @@ export function simulateRace(
  */
 export function updateRivals(rivals: Rival[]): Rival[] {
   return rivals.map((rival) => {
-    const spend = rival.budget * 0.1;
+    const spend = rival.budget * 0.1; // соперник тратит 10% бюджета на развитие после каждой гонки
     return {
       ...rival,
       budget: rival.budget - spend,
-      reliability: Math.max(5, rival.reliability - 0.1),
+      reliability: Math.max(5, rival.reliability - 0.1), // надёжность не опускается ниже 5
     };
   });
 }

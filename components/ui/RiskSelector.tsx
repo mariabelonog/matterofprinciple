@@ -1,10 +1,15 @@
 "use client";
 
+// RiskSelector — ползунок выбора уровня риска перед гонкой (0–10).
+// Значение сохраняется в GameState.riskWillingness и влияет на стратегию, DNF и вероятность аварии.
+
+// Пропсы компонента выбора риска.
 interface Props {
-  value: number;
-  onChange: (v: number) => void;
+  value: number;               // текущий уровень риска: 0–10
+  onChange: (v: number) => void; // обновляет riskWillingness в GameState
 }
 
+// Возвращает текстовую метку уровня риска для отображения рядом со значением.
 function riskLabel(v: number): string {
   if (v <= 2) return "CONSERVATIVE";
   if (v <= 4) return "MEASURED";

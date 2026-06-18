@@ -1,27 +1,35 @@
 "use client";
 
+// FinalSeasonResult — итоговый экран сезона с финальным вердиктом и статистикой.
+// Показывается когда игрок завершает все 8 гонок или объявляет банкротство.
+
 import type { GameState, ExtendedRaceResult } from "@/types/game";
 
+// Пропсы итогового экрана сезона.
 interface Props {
-  state: GameState;
-  raceHistory: ExtendedRaceResult[];
-  onPlayAgain: () => void;
+  state: GameState;                    // итоговое состояние игры
+  raceHistory: ExtendedRaceResult[];   // история всех гонок для таблицы результатов
+  onPlayAgain: () => void;             // сброс игры и возврат к главному экрану
 }
 
+// Возвращает цвет для значка позиции: зелёный (топ-3), жёлтый (топ-6), красный (остальные).
 function positionBadgeColor(pos: number): string {
   if (pos <= 3) return "#22c55e";
   if (pos <= 6) return "#f59e0b";
   return "#dc2626";
 }
 
+// Перечисление возможных итогов сезона.
 type Outcome = "LEGENDARY COMEBACK" | "SUCCESSFUL RECOVERY" | "TEAM STABILIZED" | "TEAM BANKRUPT" | "CRISIS CONTINUES";
 
+// Определяет итог сезона по средней позиции, имиджу и бюджету.
+// Порядок проверок важен: банкротство проверяется первым.
 function calcOutcome(avgPos: number, publicImage: number, budget: number): Outcome {
   if (budget < 0) return "TEAM BANKRUPT";
-  if (avgPos <= 3.5 && budget >= 0) return "LEGENDARY COMEBACK";
-  if (avgPos <= 5 && publicImage >= 5 && budget >= 0) return "SUCCESSFUL RECOVERY";
-  if (avgPos <= 6.5 && budget >= 0) return "TEAM STABILIZED";
-  return "CRISIS CONTINUES";
+  if (avgPos <= 3.5 && budget >= 0) return "LEGENDARY COMEBACK";       // средний результат P1–P3.5
+  if (avgPos <= 5 && publicImage >= 5 && budget >= 0) return "SUCCESSFUL RECOVERY"; // хорошая позиция + имидж
+  if (avgPos <= 6.5 && budget >= 0) return "TEAM STABILIZED";          // приемлемый результат
+  return "CRISIS CONTINUES"; // плохой результат при положительном бюджете
 }
 
 function outcomeColor(outcome: Outcome): string {
@@ -59,13 +67,15 @@ function outcomeNarrative(outcome: Outcome, state: GameState): string {
   }
 }
 
+// Рендерит итоговый экран: баннер с результатом, статистику и историю гонок.
 export default function FinalSeasonResult({ state, raceHistory, onPlayAgain }: Props) {
-  const positions = raceHistory.map((r) => r.position);
+  const positions = raceHistory.map((r) => r.position); // массив позиций для статистики
+  // При пустой истории (0 гонок) используем 10 как нейтральное значение по умолчанию
   const avgPosition = positions.length > 0
     ? positions.reduce((a, b) => a + b, 0) / positions.length
     : 10;
-  const bestPosition = positions.length > 0 ? Math.min(...positions) : 10;
-  const worstPosition = positions.length > 0 ? Math.max(...positions) : 10;
+  const bestPosition  = positions.length > 0 ? Math.min(...positions) : 10; // лучшая (наименьшая) позиция
+  const worstPosition = positions.length > 0 ? Math.max(...positions) : 10; // худшая (наибольшая) позиция
 
   const outcome = calcOutcome(avgPosition, state.publicImage, state.budget);
   const color = outcomeColor(outcome);

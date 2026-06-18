@@ -1,21 +1,28 @@
 "use client";
 
+// RouteMapModal — модальное окно с интерактивной картой маршрута Orient Express.
+// Отображает все 8 городов на SVG-холсте, выделяет текущий и пройденные города,
+// и показывает экономические показатели выбранного города.
+
 import { useState } from "react";
 import { CITY_ECONOMICS } from "@/data/cityEconomics";
 
 // ─── Geographic city positions on the SVG map ────────────────────────────────
-// Derived from real lat/lon, projected onto a 560×220 canvas.
-// lon range 1.5°E–30°E → x; lat range 40.5°N–49.5°N → y (north = top)
+// Координаты рассчитаны по реальным lon/lat и спроецированы на холст 560×220.
+// Диапазон долготы: 1.5°E–30°E → x; широты: 40.5°N–49.5°N → y (север = верх)
 
-const MAP_W = 560;
-const MAP_H = 220;
+const MAP_W = 560; // ширина SVG-холста в пикселях
+const MAP_H = 220; // высота SVG-холста в пикселях
 
+// Переводит географические координаты (lon, lat) в пиксельные (x, y) на SVG-холсте.
+// Формула линейно масштабирует диапазон и оставляет 20px отступ по краям.
 function geoToSvg(lon: number, lat: number): [number, number] {
-  const x = ((lon - 1.5) / 28.5) * (MAP_W - 40) + 20;
-  const y = ((49.5 - lat) / 9) * (MAP_H - 30) + 15;
+  const x = ((lon - 1.5) / 28.5) * (MAP_W - 40) + 20;  // масштабирование по долготе
+  const y = ((49.5 - lat) / 9) * (MAP_H - 30) + 15;     // инвертировано: чем севернее, тем меньше y
   return [x, y];
 }
 
+// Все 8 городов маршрута с реальными координатами (порядок соответствует RACES).
 const CITIES: { name: string; lon: number; lat: number }[] = [
   { name: "Paris",      lon: 2.35,  lat: 48.86 },
   { name: "Strassburg", lon: 7.75,  lat: 48.57 },
@@ -27,11 +34,12 @@ const CITIES: { name: string; lon: number; lat: number }[] = [
   { name: "Istanbul",   lon: 28.98, lat: 41.01 },
 ];
 
+// Словарь: имя города → [x, y] на SVG-холсте; вычисляется один раз при загрузке модуля.
 const CITY_POSITIONS = Object.fromEntries(
   CITIES.map(({ name, lon, lat }) => [name, geoToSvg(lon, lat)]),
 ) as Record<string, [number, number]>;
 
-// Rough country backdrop shapes (simplified rectangles + labels)
+// Упрощённые прямоугольники стран как подложка под маршрут (не точные границы).
 const COUNTRIES = [
   { label: "FRANCE",  x: 10,  y: 12,  w: 148, h: 80 },
   { label: "GERMANY", x: 145, y: 8,   w: 88,  h: 75 },
@@ -43,28 +51,30 @@ const COUNTRIES = [
 
 // ─── Trend arrow ─────────────────────────────────────────────────────────────
 
+// TrendArrow — иконка направления тренда экономического показателя.
 function TrendArrow({ trend }: { trend: "up" | "down" | "stable" }) {
-  if (trend === "up")     return <span style={{ color: "#22c55e" }}>▲</span>;
-  if (trend === "down")   return <span style={{ color: "#dc2626" }}>▼</span>;
-  return <span style={{ color: "#6b7280" }}>◆</span>;
+  if (trend === "up")     return <span style={{ color: "#22c55e" }}>▲</span>; // рост
+  if (trend === "down")   return <span style={{ color: "#dc2626" }}>▼</span>; // спад
+  return <span style={{ color: "#6b7280" }}>◆</span>; // стабильно
 }
 
 // ─── Main modal ──────────────────────────────────────────────────────────────
 
+// Пропсы модального окна карты маршрута.
 interface Props {
-  currentRound: number;   // 1–8, used to highlight the current city
-  onClose: () => void;
+  currentRound: number;  // номер текущего раунда 1–8, определяет подсвеченный город
+  onClose: () => void;   // закрыть модальное окно
 }
 
 export default function RouteMapModal({ currentRound, onClose }: Props) {
-  const currentCityName = CITIES[currentRound - 1]?.name ?? "Paris";
-  const [selectedCity, setSelectedCity]         = useState<string>(currentCityName);
-  const [selectedIndicator, setSelectedIndicator] = useState<string | null>(null);
+  const currentCityName = CITIES[currentRound - 1]?.name ?? "Paris"; // имя текущего города
+  const [selectedCity, setSelectedCity]           = useState<string>(currentCityName);   // выбранный город для показа экономики
+  const [selectedIndicator, setSelectedIndicator] = useState<string | null>(null);       // раскрытый экономический показатель
 
-  const economics = CITY_ECONOMICS[selectedCity];
-  const activeIndicator = economics?.indicators.find((i) => i.id === selectedIndicator);
+  const economics = CITY_ECONOMICS[selectedCity]; // данные выбранного города
+  const activeIndicator = economics?.indicators.find((i) => i.id === selectedIndicator); // раскрытый индикатор
 
-  // Build the SVG polyline points for the route
+  // Строим точки ломаной линии маршрута для SVG polyline (все 8 городов)
   const routePoints = CITIES.map(({ name }) => {
     const [x, y] = CITY_POSITIONS[name];
     return `${x},${y}`;
@@ -157,10 +167,11 @@ export default function RouteMapModal({ currentRound, onClose }: Props) {
               {/* City dots */}
               {CITIES.map(({ name }, i) => {
                 const [cx, cy] = CITY_POSITIONS[name];
-                const isSelected = name === selectedCity;
-                const isCurrent  = i + 1 === currentRound;
-                const isDone     = i + 1 < currentRound;
+                const isSelected = name === selectedCity;   // кликнутый пользователем город
+                const isCurrent  = i + 1 === currentRound; // текущая гонка (жёлтый)
+                const isDone     = i + 1 < currentRound;   // уже пройденная гонка (тёмный)
 
+                // Цвет точки: текущий — жёлтый, выбранный — красный, пройденный — коричневый, будущий — тёмный
                 const dotColor = isCurrent
                   ? "#f59e0b"
                   : isSelected
@@ -228,7 +239,8 @@ export default function RouteMapModal({ currentRound, onClose }: Props) {
               </span>
 
               {economics.indicators.map((ind) => {
-                const isOpen = selectedIndicator === ind.id;
+                const isOpen = selectedIndicator === ind.id; // этот показатель раскрыт
+                // Цвет бара индикатора: зелёный >=65, жёлтый >=35, красный <35
                 const barColor = ind.raw >= 65 ? "#22c55e" : ind.raw >= 35 ? "#f59e0b" : "#dc2626";
 
                 return (

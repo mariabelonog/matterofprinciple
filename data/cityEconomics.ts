@@ -1,20 +1,27 @@
+// cityEconomics.ts — Реальные экономические данные для городов маршрута сезона.
+// Показываются в модальном окне RouteMapModal при нажатии на карточку города.
+// Источники: данные 2023–2024 годов (МВФ, ОЭСР, Eurostat, национальные статбюро).
+
+// Один экономический показатель города (ВВП, безработица, инфляция и т.д.).
 export interface EconomicIndicator {
-  id: string;
-  label: string;
-  value: string;
-  raw: number;          // normalised 0–100 for bar rendering
-  trend: "up" | "down" | "stable";
-  explanation: string;  // shown when indicator is clicked
+  id: string;           // уникальный идентификатор для выделения активного индикатора
+  label: string;        // отображаемое название показателя
+  value: string;        // форматированное значение (например "$54 200" или "7.4%")
+  raw: number;          // нормализованное значение 0–100 для отображения прогресс-бара
+  trend: "up" | "down" | "stable"; // направление тренда для стрелки-иконки
+  explanation: string;  // расширенное объяснение, показываемое при раскрытии индикатора
 }
 
+// Экономический профиль одного города маршрута.
 export interface CityEconomics {
-  country: string;
-  population: string;
-  regionNote: string;
-  indicators: EconomicIndicator[];
+  country: string;              // страна и регион
+  population: string;           // численность населения города и агломерации
+  regionNote: string;           // краткая характеристика экономической роли города
+  indicators: EconomicIndicator[]; // список из 5 ключевых показателей
 }
 
-// All values are approximate real figures (2023–2024 sources).
+// Словарь экономических профилей, индексированный по названию города (совпадает с Race.city).
+// Все значения приблизительные (источники 2023–2024 годов).
 export const CITY_ECONOMICS: Record<string, CityEconomics> = {
   Paris: {
     country: "France",

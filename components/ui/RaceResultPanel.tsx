@@ -1,17 +1,25 @@
 "use client";
+
+// RaceResultPanel — устаревший компонент отображения результата гонки.
+// В актуальном коде заменён на ExtendedResultPanel внутри RaceScreen.tsx.
+// Оставлен для обратной совместимости; использует базовый тип RaceResult без финансов.
+
 import type { RaceResult } from "@/types/game";
 
+// Пропсы панели результата гонки.
 interface Props {
-  result: RaceResult;
-  onContinue: () => void;
+  result: RaceResult;      // базовый результат без расширенных финансовых данных
+  onContinue: () => void;  // переход к следующему экрану
 }
 
+// Возвращает цвет границы/текста в зависимости от позиции: зелёный (топ-3), жёлтый (топ-6), красный (остальные).
 function positionColor(pos: number): string {
   if (pos <= 3) return "#22c55e";
   if (pos <= 6) return "#f59e0b";
   return "#dc2626";
 }
 
+// Строка с меткой и числовым значением, округлённым до 3 знаков после запятой.
 function StatRow({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex items-center justify-between gap-4">

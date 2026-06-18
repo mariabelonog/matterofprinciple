@@ -1,5 +1,10 @@
+// simulation.ts — Базовые формулы и вспомогательные функции для расчёта результатов гонки.
+// Не содержит ГПСЧ: функции rollSponsor и rollCrash используют Math.random() и предназначены
+// для устаревших вызовов. Новый код использует simulateRace из simulationEngine.ts.
+
 import type { Driver, GameState, RaceResult } from "@/types/game";
 
+// Три доступных пилота — вымышленные персонажи с разным соотношением цены и мастерства.
 export const DRIVERS: Driver[] = [
   {
     id: "lorris",
@@ -32,24 +37,33 @@ export const INVESTMENT_DIVISORS = {
   publicImage:    12_000_000,
 } as const;
 
+// Производительность автомобиля: машина важнее персонала (60% против 40%).
 export function calcCarPerformance(carDevelopment: number, staffQuality: number): number {
   return carDevelopment * 0.6 + staffQuality * 0.4;
 }
 
+// Стратегия: персонал важнее риска (70% против 30%).
+// Высокий riск помогает стратегии, но только слабо — главное инвестировать в персонал.
 export function calcStrategy(staffQuality: number, riskWillingness: number): number {
   return staffQuality * 0.7 + riskWillingness * 0.3;
 }
 
+// Вклад пилота: мастерство важнее риска (60% против 40%).
+// Высокий риск усиливает пилота, но увеличивает вероятность аварии.
 export function calcDriverInput(driverIndex: number, riskWillingness: number): number {
   return driverIndex * 0.6 + riskWillingness * 0.4;
 }
 
+// Итоговый счёт гонки: взвешенная сумма трёх компонентов.
+// driverWeight по умолчанию 0.1 — авто-симуляция, в Будапеште передаётся 0.4 (гонка пилота).
+// carWeight вычисляется динамически, чтобы сумма весов всегда равнялась 1.
 export function calcRaceScore(carPerformance: number, driverInput: number, strategy: number, driverWeight = 0.1): number {
-  const carWeight = 0.6 - (driverWeight - 0.1) / 2;
-  const stratWeight = 1 - carWeight - driverWeight;
+  const carWeight = 0.6 - (driverWeight - 0.1) / 2; // компенсирует увеличение веса пилота
+  const stratWeight = 1 - carWeight - driverWeight;  // остаток достаётся стратегии
   return carPerformance * carWeight + driverInput * driverWeight + strategy * stratWeight;
 }
 
+// Позиция: количество соперников с бо́льшим счётом плюс 1 (1-indexed).
 export function calcPosition(playerScore: number, opponentScores: number[]): number {
   return opponentScores.filter((s) => s > playerScore).length + 1;
 }
@@ -84,16 +98,18 @@ export function rollCrash(
   return { didCrash, losses };
 }
 
-// Generic race runner — usable for all 8 races
+// Универсальный запуск гонки — используется для всех 8 гонок сезона.
+// Возвращает числовые компоненты без narrative, так как текст генерируется вызывающей стороной.
 export function runRace(
   state: GameState,
   opponentScores: number[],
-  effectiveRisk: number,  // riskWillingness + crisisRiskModifier, clamped 0–10
+  effectiveRisk: number,  // riskWillingness + crisisRiskModifier, ограничен диапазоном 0–10
   driverBoost = 0,
-  driverWeight = 0.1,     // Budapest passes 0.4 here
+  driverWeight = 0.1,     // в Будапеште передаётся 0.4 (особая гонка с упором на пилота)
 ): Omit<RaceResult, "narrative"> & { carPerformance: number; strategy: number; driverInput: number } {
   if (!state.driver) throw new Error("No driver selected");
   const { carDevelopment, staffQuality } = state;
+  // Бонус пилота от кризиса не может поднять индекс выше максимума 10
   const driverIndex = Math.min(10, state.driver.driverIndex + driverBoost);
 
   const carPerformance = calcCarPerformance(carDevelopment, staffQuality);
@@ -105,7 +121,8 @@ export function runRace(
   return { carPerformance, strategy, driverInput, raceScore, position };
 }
 
-// Position narrative — generic version
+// Генерирует текстовый комментарий к результату гонки по позиции.
+// Используется как RaceScreen, так и устаревшим runParisRace.
 export function buildRaceNarrative(city: string, position: number): string {
   if (position === 1)
     return `P1 in ${city}. An extraordinary result. The paddock takes notice. Keep it up.`;
@@ -120,7 +137,8 @@ export function buildRaceNarrative(city: string, position: number): string {
   return `P10 in ${city}. Last place. A complete rethink may be required.`;
 }
 
-// Keep runParisRace for backward compat with any existing references
+// Оставлено для обратной совместимости — новый код использует simulateRace из simulationEngine.ts.
+// Баллы соперников для первой гонки сезона (Париж, раунд 1).
 const PARIS_OPPONENT_SCORES = [1.5, 2.0, 2.2, 2.5, 2.8, 3.0, 3.3, 3.6, 4.0];
 
 export function runParisRace(state: GameState): RaceResult {

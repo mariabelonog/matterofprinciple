@@ -1,21 +1,28 @@
 "use client";
 
+// CrisisPanel — панель кризисного события с обратным отсчётом 15 секунд.
+// Если время истекает без выбора, автоматически выбирается второй (средний) вариант.
+// Компонент блокирует повторный выбор через chosenRef во избежание двойного вызова.
+
 import { useEffect, useRef, useState } from "react";
 import type { CrisisEvent, CrisisChoice } from "@/types/game";
 
-const CRISIS_SECONDS = 15;
+const CRISIS_SECONDS = 15; // время на принятие решения в секундах
 
+// Пропсы панели кризисного события.
 interface Props {
-  event: CrisisEvent;
-  onChoice: (choice: CrisisChoice) => void;
+  event: CrisisEvent;                  // данные события: заголовок, описание, варианты
+  onChoice: (choice: CrisisChoice) => void; // вызывается с выбранным вариантом
 }
 
+// Форматирует числовое изменение индекса как строку "+3" или "-1" (возвращает null если 0).
 function formatDelta(label: string, value: number | undefined): string | null {
   if (value === undefined || value === 0) return null;
   const sign = value > 0 ? "+" : "";
   return `${label}: ${sign}${value}`;
 }
 
+// Форматирует изменение бюджета в миллионах G (например "+5M G" или "-8M G").
 function formatBudgetDelta(value: number | undefined): string | null {
   if (value === undefined || value === 0) return null;
   const sign = value > 0 ? "+" : "";
@@ -57,25 +64,27 @@ function ChoiceEffects({ choice }: { choice: CrisisChoice }) {
   );
 }
 
+// Рендерит кризисное событие с таймером, описанием и кнопками выбора.
 export default function CrisisPanel({ event, onChoice }: Props) {
-  const [secondsLeft, setSecondsLeft] = useState(CRISIS_SECONDS);
-  const [expired, setExpired] = useState(false);
-  const chosenRef = useRef(false);
+  const [secondsLeft, setSecondsLeft] = useState(CRISIS_SECONDS); // текущее значение обратного отсчёта
+  const [expired, setExpired] = useState(false);  // true если время вышло
+  const chosenRef = useRef(false); // ref вместо state чтобы избежать повторного рендера при блокировке
 
+  // Запускает таймер: каждую секунду уменьшает счётчик; при нуле делает автовыбор.
   useEffect(() => {
     if (secondsLeft <= 0) {
       if (!chosenRef.current) {
         chosenRef.current = true;
         setExpired(true);
-        // Auto-select the middle (safest-looking) choice after a brief pause
+        // Небольшая задержка перед автовыбором чтобы игрок успел увидеть "TIME EXPIRED"
         const id = setTimeout(() => onChoice(event.choices[1] ?? event.choices[0]), 600);
         return () => clearTimeout(id);
       }
       return;
     }
 
-    const id = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
-    return () => clearTimeout(id);
+    const id = setTimeout(() => setSecondsLeft((s) => s - 1), 1000); // тик каждую секунду
+    return () => clearTimeout(id); // очищаем таймер при ремаунте или изменении зависимостей
   }, [secondsLeft, event.choices, onChoice]);
 
   function handleChoice(choice: CrisisChoice) {
@@ -84,7 +93,8 @@ export default function CrisisPanel({ event, onChoice }: Props) {
     onChoice(choice);
   }
 
-  const pct = (secondsLeft / CRISIS_SECONDS) * 100;
+  const pct = (secondsLeft / CRISIS_SECONDS) * 100; // ширина прогресс-бара таймера в процентах
+  // Цвет таймера меняется от зелёного к красному по мере приближения дедлайна
   const barColor = secondsLeft > 8 ? "#22c55e" : secondsLeft > 4 ? "#f59e0b" : "#dc2626";
 
   return (

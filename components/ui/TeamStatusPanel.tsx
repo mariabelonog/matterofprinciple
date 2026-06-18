@@ -1,11 +1,17 @@
 "use client";
 
+// TeamStatusPanel — панель текущего состояния команды: бюджет, пилот и четыре индекса.
+// Отображается на экране настройки перед гонкой (фаза "setup" в RaceScreen).
+
 import type { GameState } from "@/types/game";
 
+// Пропсы панели состояния команды.
 interface Props {
-  state: GameState;
+  state: GameState; // полное игровое состояние для отображения всех показателей
 }
 
+// Горизонтальный прогресс-бар одного индекса с цветовым кодированием.
+// Зелёный >=7, жёлтый >=4, красный <4.
 function StatBar({ label, value }: { label: string; value: number }) {
   const color = value >= 7 ? "#22c55e" : value >= 4 ? "#f59e0b" : "#dc2626";
   const pct = (value / 10) * 100;
