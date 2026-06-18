@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import type { BudgetAllocation } from "@/types/game";
+import type { BudgetAllocation, ExtendedRaceResult, Driver } from "@/types/game";
 import { applyInvestment, INVESTMENT_DIVISORS } from "@/lib/simulation";
+import TeamKPIPanel from "@/components/ui/TeamKPIPanel";
 
 interface Props {
   raceNumber: number;
@@ -11,6 +12,8 @@ interface Props {
   currentCarDev: number;
   currentStaff: number;
   currentImage: number;
+  raceHistory: ExtendedRaceResult[];
+  driver: Driver | null;
   onConfirm: (alloc: BudgetAllocation) => void;
 }
 
@@ -87,6 +90,8 @@ export default function InvestmentScreen({
   currentCarDev,
   currentStaff,
   currentImage,
+  raceHistory,
+  driver,
   onConfirm,
 }: Props) {
   const [carDevRaw, setCarDevRaw] = useState("");
@@ -176,6 +181,13 @@ export default function InvestmentScreen({
         currentIndex={currentImage}
         newIndex={newImage}
         maxM={budgetM}
+      />
+
+      {/* Team KPI panel — collapsible, available after first race */}
+      <TeamKPIPanel
+        raceHistory={raceHistory}
+        currentBudget={budget}
+        driver={driver}
       />
 
       <p className="text-gray-600 text-[13px] font-mono text-center">

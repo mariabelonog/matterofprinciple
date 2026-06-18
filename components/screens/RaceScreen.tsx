@@ -3,11 +3,13 @@
 import { useState } from "react";
 import type { Race, GameState, ExtendedRaceResult, CrisisChoice } from "@/types/game";
 import { CRISIS_EVENTS } from "@/lib/crisisEvents";
-import { runRace, rollSponsor, rollCrash, buildRaceNarrative } from "@/lib/simulation";
+import { buildRaceNarrative } from "@/lib/simulation";
+import { simulateRace, rollSponsorSeeded } from "@/lib/simulationEngine";
 import TeamStatusPanel from "@/components/ui/TeamStatusPanel";
 import RiskSelector from "@/components/ui/RiskSelector";
 import SponsorUpdate from "@/components/ui/SponsorUpdate";
 import CrisisPanel from "@/components/ui/CrisisPanel";
+import RouteMapModal from "@/components/ui/RouteMapModal";
 
 interface Props {
   race: Race;
@@ -23,11 +25,13 @@ type Phase = "sponsor" | "crisis" | "setup" | "result";
 
 const ROUTE = ["Paris","Strassburg","Stuttgart","Vienna","Budapest","Bucharest","Sinaia","Istanbul"];
 
-function OrientExpressRoute({ currentRound }: { currentRound: number }) {
+function OrientExpressRoute({ currentRound, onOpenMap }: { currentRound: number; onOpenMap: () => void }) {
   return (
     <div
-      className="w-full p-4 flex flex-col gap-3"
+      className="w-full p-4 flex flex-col gap-3 cursor-pointer"
       style={{ border: "3px solid #78350f", boxShadow: "4px 4px 0px #1c1000", backgroundColor: "#0a0600" }}
+      onClick={onOpenMap}
+      title="Open economic map"
     >
       {/* Label */}
       <div className="flex items-center gap-2">
@@ -37,6 +41,7 @@ function OrientExpressRoute({ currentRound }: { currentRound: number }) {
         >
           ▶ ORIENT EXPRESS CIRCUIT
         </span>
+        <span className="text-[10px] font-mono text-amber-900 ml-auto">TAP FOR MAP ↗</span>
         <div className="flex-1 h-[1px] bg-amber-900 opacity-40" />
         <span className="text-amber-900 text-[11px] font-mono">SEASON 01</span>
       </div>
@@ -361,6 +366,79 @@ function CityCard({ race }: { race: Race }) {
   );
 }
 
+// ─── Race standings table ─────────────────────────────────────────────────────
+
+interface StandingsEntry {
+  pos: number;
+  name: string;
+  score: number;
+  dnf: boolean;
+  isPlayer: boolean;
+}
+
+function RaceStandings({ playerName, result }: { playerName: string; result: ExtendedRaceResult }) {
+  const playerEntry: StandingsEntry = {
+    pos: result.position,
+    name: playerName, // city reused as placeholder; caller passes teamName below
+    score: result.raceScore,
+    dnf: result.dnf,
+    isPlayer: true,
+  };
+
+  const rivalEntries: StandingsEntry[] = result.rivalResults.map((r) => ({
+    pos: 0, // computed after sorting
+    name: r.teamName,
+    score: r.score,
+    dnf: r.dnf,
+    isPlayer: false,
+  }));
+
+  // Sort all entries: DNF goes last, others by score descending
+  const all: StandingsEntry[] = [playerEntry, ...rivalEntries].sort((a, b) => {
+    if (a.dnf && !b.dnf) return 1;
+    if (!a.dnf && b.dnf) return -1;
+    return b.score - a.score;
+  });
+  all.forEach((e, i) => { e.pos = e.dnf ? 10 : i + 1; });
+
+  return (
+    <div
+      className="w-full p-4 flex flex-col gap-2"
+      style={{ border: "3px solid #374151", boxShadow: "4px 4px 0px #111827", backgroundColor: "#0d0d0d" }}
+    >
+      <span
+        className="text-amber-400 text-[12px] tracking-widest uppercase mb-1"
+        style={{ fontFamily: "var(--font-pixel), monospace" }}
+      >
+        ■ RACE STANDINGS
+      </span>
+      {all.map((entry, i) => {
+        const posColor = entry.dnf ? "#dc2626" : entry.pos <= 3 ? "#22c55e" : entry.pos <= 6 ? "#f59e0b" : "#6b7280";
+        return (
+          <div
+            key={i}
+            className="flex items-center gap-3 py-1"
+            style={entry.isPlayer ? { borderLeft: "3px solid #dc2626", paddingLeft: "8px" } : { paddingLeft: "11px" }}
+          >
+            <span className="text-[12px] font-mono w-8 shrink-0" style={{ color: posColor }}>
+              {entry.dnf ? "DNF" : `P${entry.pos}`}
+            </span>
+            <span
+              className="text-[13px] font-mono flex-1 truncate"
+              style={{ color: entry.isPlayer ? "#ffffff" : "#9ca3af" }}
+            >
+              {entry.name}
+            </span>
+            <span className="text-[12px] font-mono shrink-0" style={{ color: entry.isPlayer ? "#e5e7eb" : "#6b7280" }}>
+              {entry.dnf ? "—" : entry.score.toFixed(3)}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Result panel (extended) ──────────────────────────────────────────────────
 
 function positionColor(pos: number): string {
@@ -381,13 +459,14 @@ function StatRow({ label, value }: { label: string; value: number }) {
 interface ResultPanelProps {
   result: ExtendedRaceResult;
   nextCity: string | null; // null means final race
+  playerTeamName: string;
   onContinue: () => void;
 }
 
-function ExtendedResultPanel({ result, nextCity, onContinue }: ResultPanelProps) {
-  const color = positionColor(result.position);
-  const posLabel = result.position === 1 ? "VICTORY" : result.position <= 3 ? "PODIUM" : "FINISH";
-  const shadowColor = result.position <= 3 ? "#166534" : result.position <= 6 ? "#78350f" : "#7f1d1d";
+function ExtendedResultPanel({ result, nextCity, playerTeamName, onContinue }: ResultPanelProps) {
+  const color = result.dnf ? "#dc2626" : positionColor(result.position);
+  const posLabel = result.dnf ? "RETIRED" : result.position === 1 ? "VICTORY" : result.position <= 3 ? "PODIUM" : "FINISH";
+  const shadowColor = result.dnf ? "#7f1d1d" : result.position <= 3 ? "#166534" : result.position <= 6 ? "#78350f" : "#7f1d1d";
 
   return (
     <div className="w-full flex flex-col gap-6">
@@ -396,40 +475,44 @@ function ExtendedResultPanel({ result, nextCity, onContinue }: ResultPanelProps)
         className="w-full flex flex-col items-center py-8 gap-2"
         style={{ border: `3px solid ${color}`, boxShadow: `4px 4px 0px ${shadowColor}`, backgroundColor: "#111111" }}
       >
-        <span className="text-[56px] font-bold font-mono" style={{ color }}>P{result.position}</span>
+        <span className="text-[56px] font-bold font-mono" style={{ color }}>
+          {result.dnf ? "DNF" : `P${result.position}`}
+        </span>
         <span className="text-[14px] tracking-widest uppercase" style={{ fontFamily: "var(--font-pixel), monospace", color }}>
           {posLabel}
         </span>
       </div>
 
-      {/* Finance summary */}
-      {(result.sponsorIncome > 0 || result.crashLosses > 0) && (
-        <div
-          className="w-full p-4 flex flex-col gap-2"
-          style={{ border: "3px solid #374151", boxShadow: "4px 4px 0px #111827", backgroundColor: "#111111" }}
-        >
-          <span className="text-amber-400 text-[12px] tracking-widest uppercase mb-1" style={{ fontFamily: "var(--font-pixel), monospace" }}>
-            ■ RACE FINANCES
-          </span>
-          {result.sponsorIncome > 0 && (
-            <div className="flex justify-between">
-              <span className="text-gray-400 text-[13px] font-mono">Sponsor income</span>
-              <span className="text-green-400 text-[13px] font-mono font-bold">+{(result.sponsorIncome / 1_000_000).toFixed(1)}M G</span>
-            </div>
-          )}
-          {result.crashLosses > 0 && (
-            <div className="flex justify-between">
-              <span className="text-gray-400 text-[13px] font-mono">Crash losses</span>
-              <span className="text-red-400 text-[13px] font-mono font-bold">-{(result.crashLosses / 1_000_000).toFixed(1)}M G</span>
-            </div>
-          )}
-          <div className="border-t border-[#333] my-1" />
-          <div className="flex justify-between">
-            <span className="text-gray-400 text-[13px] font-mono">Budget after</span>
-            <span className="text-white text-[13px] font-mono font-bold">{(result.budgetAfter / 1_000_000).toFixed(1)}M G</span>
-          </div>
+      {/* Finance summary — always shown now that prize money exists */}
+      <div
+        className="w-full p-4 flex flex-col gap-2"
+        style={{ border: "3px solid #374151", boxShadow: "4px 4px 0px #111827", backgroundColor: "#111111" }}
+      >
+        <span className="text-amber-400 text-[12px] tracking-widest uppercase mb-1" style={{ fontFamily: "var(--font-pixel), monospace" }}>
+          ■ RACE FINANCES
+        </span>
+        <div className="flex justify-between">
+          <span className="text-gray-400 text-[13px] font-mono">Prize money (P{result.position})</span>
+          <span className="text-green-400 text-[13px] font-mono font-bold">+{(result.prizeMoneyEarned / 1_000_000).toFixed(0)}M G</span>
         </div>
-      )}
+        {result.sponsorIncome > 0 && (
+          <div className="flex justify-between">
+            <span className="text-gray-400 text-[13px] font-mono">Sponsor income</span>
+            <span className="text-green-400 text-[13px] font-mono font-bold">+{(result.sponsorIncome / 1_000_000).toFixed(1)}M G</span>
+          </div>
+        )}
+        {result.crashLosses > 0 && (
+          <div className="flex justify-between">
+            <span className="text-gray-400 text-[13px] font-mono">Crash losses</span>
+            <span className="text-red-400 text-[13px] font-mono font-bold">-{(result.crashLosses / 1_000_000).toFixed(1)}M G</span>
+          </div>
+        )}
+        <div className="border-t border-[#333] my-1" />
+        <div className="flex justify-between">
+          <span className="text-gray-400 text-[13px] font-mono">Budget after</span>
+          <span className="text-white text-[13px] font-mono font-bold">{(result.budgetAfter / 1_000_000).toFixed(1)}M G</span>
+        </div>
+      </div>
 
       {/* Crisis narrative */}
       {result.crisisNarrative && (
@@ -457,6 +540,16 @@ function ExtendedResultPanel({ result, nextCity, onContinue }: ResultPanelProps)
         <StatRow label="Driver Input" value={result.driverInput} />
         <div className="border-t border-[#333] my-1" />
         <StatRow label="Race Score" value={result.raceScore} />
+        <div className="border-t border-[#333] my-1" />
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-gray-400 text-[13px] font-mono tracking-widest uppercase">Reliability</span>
+          <span
+            className="text-[14px] font-mono"
+            style={{ color: result.reliabilityAfter >= 7 ? "#22c55e" : result.reliabilityAfter >= 4 ? "#f59e0b" : "#dc2626" }}
+          >
+            {result.reliabilityAfter.toFixed(2)}
+          </span>
+        </div>
       </div>
 
       {/* Narrative */}
@@ -466,6 +559,11 @@ function ExtendedResultPanel({ result, nextCity, onContinue }: ResultPanelProps)
       >
         <p className="text-gray-300 text-[15px] font-mono leading-relaxed">{result.narrative}</p>
       </div>
+
+      {/* Race standings */}
+      {result.rivalResults.length > 0 && (
+        <RaceStandings playerName={playerTeamName} result={result} />
+      )}
 
       {/* Continue button */}
       <button
@@ -487,8 +585,12 @@ export default function RaceScreen({ race, state, onStateChange, onRaceComplete,
   const initialPhase: Phase = "sponsor";
 
   const [phase, setPhase] = useState<Phase>(initialPhase);
-  // Roll sponsor once when component mounts (React strict mode runs twice in dev, but result is stored)
-  const [sponsorResult] = useState(() => rollSponsor(state.publicImage));
+  const [mapOpen, setMapOpen] = useState(false);
+
+  // Roll sponsor using the seeded PRNG so it's reproducible and consistent with simulateRace
+  const [sponsorResult] = useState(() =>
+    rollSponsorSeeded(state.seasonSeed, race.round, state.publicImage),
+  );
   const [crisisRiskModifier, setCrisisRiskModifier] = useState(0);
   const [crashLossMultiplier, setCrashLossMultiplier] = useState(1);
   const [driverBoost, setDriverBoost] = useState(0);
@@ -527,30 +629,43 @@ export default function RaceScreen({ race, state, onStateChange, onRaceComplete,
 
   function handleRunRace() {
     const effectiveRisk = Math.min(10, Math.max(0, state.riskWillingness + crisisRiskModifier));
-    const driverWeight = race.city === "Budapest" ? 0.4 : 0.1;
-    const raceData = runRace(state, race.opponentScores, effectiveRisk, driverBoost, driverWeight);
-    const crashData = rollCrash(
-      effectiveRisk,
-      state.lastCarInvestment,
-      state.previousCarInvestment,
-      crashLossMultiplier,
-    );
-    const narrative = buildRaceNarrative(race.city, raceData.position);
+    const driverWeight = race.city === "Budapest" ? 0.5 : 0.25;
 
-    // Budget after = current budget + sponsorIncome - crashLosses
-    // Note: crisis budget deltas already applied via onStateChange
-    const budgetAfter = state.budget + sponsorResult.income - crashData.losses;
+    const sim = simulateRace(
+      state,
+      race,
+      effectiveRisk,
+      driverBoost,
+      crashLossMultiplier,
+      driverWeight,
+    );
+
+    const narrative = sim.playerDnf
+      ? `DNF in ${race.city}. Mechanical failure ended the race early. The car is badly damaged.`
+      : buildRaceNarrative(race.city, sim.position);
+
+    // Crisis budget deltas were already applied via onStateChange before this runs
+    const budgetAfter =
+      state.budget + sim.prizeMoneyEarned + sim.sponsorIncome - sim.crashLosses;
 
     const result: ExtendedRaceResult = {
-      ...raceData,
+      carPerformance: sim.carPerformance,
+      strategy: sim.strategy,
+      driverInput: sim.driverInput,
+      raceScore: sim.playerScore,
+      position: sim.position,
       narrative,
       raceNumber: race.round,
       city: race.city,
-      sponsorIncome: sponsorResult.income,
-      crashLosses: crashData.losses,
+      sponsorIncome: sim.sponsorIncome,
+      crashLosses: sim.crashLosses,
       budgetAfter,
       crisisChoiceId,
       crisisNarrative,
+      prizeMoneyEarned: sim.prizeMoneyEarned,
+      dnf: sim.playerDnf,
+      reliabilityAfter: sim.reliabilityAfter,
+      rivalResults: sim.rivalResults,
     };
 
     setRaceResult(result);
@@ -573,8 +688,11 @@ export default function RaceScreen({ race, state, onStateChange, onRaceComplete,
         ▶ RACE {race.round} — {race.city.toUpperCase()}
       </div>
 
-      {/* Orient Express route strip */}
-      <OrientExpressRoute currentRound={race.round} />
+      {/* Orient Express route strip — click to open economic map */}
+      <OrientExpressRoute currentRound={race.round} onOpenMap={() => setMapOpen(true)} />
+      {mapOpen && (
+        <RouteMapModal currentRound={race.round} onClose={() => setMapOpen(false)} />
+      )}
 
       {/* City card always visible */}
       <CityCard race={race} />
@@ -628,6 +746,7 @@ export default function RaceScreen({ race, state, onStateChange, onRaceComplete,
         <ExtendedResultPanel
           result={raceResult}
           nextCity={nextCityLabel}
+          playerTeamName={state.teamName}
           onContinue={onContinue}
         />
       )}

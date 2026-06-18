@@ -50,6 +50,7 @@ export default function TeamStatusPanel({ state }: Props) {
       <StatBar label="Car Development" value={state.carDevelopment} />
       <StatBar label="Staff Quality" value={state.staffQuality} />
       <StatBar label="Public Image" value={state.publicImage} />
+      <StatBar label="Reliability" value={state.carReliability} />
     </div>
   );
 }
