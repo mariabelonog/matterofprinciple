@@ -1,15 +1,21 @@
 "use client";
 
+// TeamSetup — экран ввода названия команды. Первый шаг после главного экрана.
+// Здесь задаётся имя команды, которое будет использоваться весь сезон.
+
 import { useState } from "react";
 
+// Пропсы экрана настройки команды.
 interface TeamSetupProps {
-  onConfirm: (teamName: string) => void;
+  onConfirm: (teamName: string) => void; // вызывается с введённым именем при успешной валидации
 }
 
+// Рендерит поле ввода названия команды с валидацией длины и кнопкой подтверждения.
 export default function TeamSetup({ onConfirm }: TeamSetupProps) {
-  const [teamName, setTeamName] = useState("");
-  const [error, setError] = useState("");
+  const [teamName, setTeamName] = useState("");  // текущее значение поля ввода
+  const [error, setError] = useState("");        // сообщение об ошибке валидации; пустая строка = нет ошибки
 
+  // Валидирует имя и вызывает onConfirm при успехе, иначе отображает ошибку.
   function handleConfirm() {
     const trimmed = teamName.trim();
     if (!trimmed) {
@@ -27,9 +33,10 @@ export default function TeamSetup({ onConfirm }: TeamSetupProps) {
     onConfirm(trimmed);
   }
 
+  // Обрабатывает нажатие Enter для подтверждения и очищает ошибку при вводе.
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") handleConfirm();
-    if (error) setError("");
+    if (error) setError(""); // сбрасываем ошибку при любом нажатии клавиши
   }
 
   return (

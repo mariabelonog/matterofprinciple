@@ -1,20 +1,26 @@
 "use client";
 
+// DriverSelectionScreen — экран выбора пилота из трёх вариантов.
+// Стоимость пилота вычитается из бюджета немедленно при подтверждении.
+
 import { useState } from "react";
 import type { Driver } from "@/types/game";
 import { DRIVERS } from "@/lib/simulation";
 
+// Пропсы экрана выбора пилота.
 interface Props {
-  budget: number;
-  onSelect: (driver: Driver) => void;
+  budget: number;                   // текущий бюджет до выбора пилота
+  onSelect: (driver: Driver) => void; // вызывается с выбранным пилотом при подтверждении
 }
 
+// Форматирует сумму в G как строку вида "35.0M G" для отображения в интерфейсе.
 function formatG(n: number): string {
   return (n / 1_000_000).toFixed(1) + "M G";
 }
 
+// Визуальный прогресс-бар индекса пилота: зелёный >=8, жёлтый >=6, красный <6.
 function DriverIndexBar({ value }: { value: number }) {
-  const pct = (value / 10) * 100;
+  const pct = (value / 10) * 100; // ширина заполненной части в процентах
   const color = value >= 8 ? "#22c55e" : value >= 6 ? "#f59e0b" : "#dc2626";
   return (
     <div className="flex items-center gap-2">
@@ -28,10 +34,13 @@ function DriverIndexBar({ value }: { value: number }) {
   );
 }
 
+// Рендерит список карточек пилотов с возможностью выбора одного и подтверждения.
 export default function DriverSelectionScreen({ budget, onSelect }: Props) {
-  const [selected, setSelected] = useState<Driver | null>(null);
+  const [selected, setSelected] = useState<Driver | null>(null); // выбранный пилот; null = ничего не выбрано
 
+  // Оставшийся бюджет после оплаты контракта пилота (может быть отрицательным).
   const remaining = selected ? budget - selected.cost : budget;
+  // Нельзя подтвердить выбор, если пилот не выбран или денег недостаточно.
   const canConfirm = selected !== null && remaining >= 0;
 
   return (

@@ -1,10 +1,15 @@
 "use client";
 
+// HeroScreen — стартовый экран игры с логотипом, пиксельной машиной и кнопками входа.
+// Является первым экраном, который видит игрок; навигации назад нет.
+
+// Пропсы стартового экрана.
 interface HeroScreenProps {
-  onStart: () => void;
-  onHowToPlay: () => void;
+  onStart: () => void;      // переход к экрану настройки команды
+  onHowToPlay: () => void;  // переход к экрану правил игры
 }
 
+// Рендерит стартовую страницу с заголовком, SVG-машиной и двумя кнопками действий.
 export default function HeroScreen({ onStart, onHowToPlay }: HeroScreenProps) {
   return (
     <div className="relative z-20 text-center px-6 max-w-2xl mx-auto flex flex-col items-center gap-6 py-16">

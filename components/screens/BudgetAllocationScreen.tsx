@@ -1,32 +1,40 @@
 "use client";
 
+// BudgetAllocationScreen — экран дораскладки бюджета перед первой гонкой (Париж).
+// Игрок распределяет оставшиеся деньги по трём категориям: машина, персонал, имидж.
+
 import { useState } from "react";
 import type { BudgetAllocation } from "@/types/game";
 import { applyInvestment, INVESTMENT_DIVISORS } from "@/lib/simulation";
 
+// Пропсы экрана предсезонного распределения бюджета.
 interface Props {
-  budget: number;
-  onConfirm: (alloc: BudgetAllocation) => void;
+  budget: number;                       // доступный бюджет после покупки пилота
+  onConfirm: (alloc: BudgetAllocation) => void; // вызывается с суммами в G при подтверждении
 }
 
+// Преобразует строку из поля ввода (цифры) в целое число миллионов G.
+// Нечисловые символы отфильтровываются, пустая строка возвращает 0.
 function parseM(s: string): number {
   const n = parseInt(s.replace(/\D/g, ""), 10);
   return isNaN(n) ? 0 : n;
 }
 
+// Пропсы одной строки ввода инвестиций с прогресс-баром индекса.
 interface AllocInputProps {
-  label: string;
-  description: string;
-  raw: string;
-  onRawChange: (v: string) => void;
-  currentIndex: number;
-  newIndex: number;
-  maxM: number;
+  label: string;            // заголовок категории (например "CAR DEVELOPMENT")
+  description: string;      // подсказка под заголовком
+  raw: string;              // сырая строка из поля ввода (хранится как строка для корректной работы input)
+  onRawChange: (v: string) => void; // обновляет raw при изменении поля
+  currentIndex: number;     // текущее значение индекса до инвестиции
+  newIndex: number;         // прогнозируемое значение индекса после инвестиции
+  maxM: number;             // максимально доступная сумма в M G (ограничение поля)
 }
 
+// Одна строка ввода суммы инвестиций с прогресс-баром результирующего индекса.
 function AllocInput({ label, description, raw, onRawChange, currentIndex, newIndex, maxM }: AllocInputProps) {
-  const indexColor = newIndex >= 7 ? "#22c55e" : newIndex >= 4 ? "#f59e0b" : "#dc2626";
-  const pct = (newIndex / 10) * 100;
+  const indexColor = newIndex >= 7 ? "#22c55e" : newIndex >= 4 ? "#f59e0b" : "#dc2626"; // цвет по значению индекса
+  const pct = (newIndex / 10) * 100; // ширина прогресс-бара в процентах
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const digits = e.target.value.replace(/\D/g, "");
@@ -75,20 +83,24 @@ function AllocInput({ label, description, raw, onRawChange, currentIndex, newInd
   );
 }
 
+// Рендерит три поля ввода инвестиций с отображением бюджета и кнопкой подтверждения.
 export default function BudgetAllocationScreen({ budget, onConfirm }: Props) {
+  // Сырые строки полей ввода хранятся отдельно, чтобы избежать проблем с форматированием при вводе
   const [carDevRaw, setCarDevRaw] = useState("");
   const [staffRaw, setStaffRaw] = useState("");
   const [imageRaw, setImageRaw] = useState("");
 
+  // Преобразуем строки в числа миллионов G для расчётов
   const carDevM = parseM(carDevRaw);
   const staffM = parseM(staffRaw);
   const imageM = parseM(imageRaw);
 
-  const totalAllocatedM = carDevM + staffM + imageM;
-  const budgetM = budget / 1_000_000;
-  const remainingM = budgetM - totalAllocatedM;
-  const isOverspending = totalAllocatedM > budgetM;
+  const totalAllocatedM = carDevM + staffM + imageM; // сумма всех введённых инвестиций в M G
+  const budgetM = budget / 1_000_000;               // доступный бюджет в M G для отображения
+  const remainingM = budgetM - totalAllocatedM;      // остаток бюджета после распределения
+  const isOverspending = totalAllocatedM > budgetM;  // true — игрок пытается потратить больше, чем есть
 
+  // Рассчитываем прогнозируемые индексы с нуля (предсезонное вложение, текущий = 0)
   const newCarDev = applyInvestment(0, carDevM * 1_000_000, INVESTMENT_DIVISORS.carDevelopment);
   const newStaff  = applyInvestment(0, staffM  * 1_000_000, INVESTMENT_DIVISORS.staffQuality);
   const newImage  = applyInvestment(0, imageM  * 1_000_000, INVESTMENT_DIVISORS.publicImage);

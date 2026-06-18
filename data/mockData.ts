@@ -1,7 +1,9 @@
-// Static mock data for Matter of Principle — all values are fictional.
-// No real F1 teams, drivers, circuits, or entities are referenced.
+// mockData.ts — Статические тестовые данные для разработки и демонстрации.
+// Все значения вымышлены; реальные команды Ф1, пилоты и трассы не упоминаются.
+// Эти данные не используются в игровом процессе — только для ручного тестирования.
 
-// Indices: all bounded 0–10 per game spec.
+// Пример состояния команды в середине сезона (после 1 гонки, бюджет 82M G).
+// Все индексы ограничены диапазоном 0–10 согласно игровой спецификации.
 export const teamState = {
   teamName: "Vortex Motorsport",
   budget: 82_000_000,          // in Geld (G); starts at 100M
@@ -13,6 +15,7 @@ export const teamState = {
   currentRace: 2,              // 1–8
 };
 
+// Тестовые пилоты (отличаются от игровых DRIVERS в lib/simulation.ts).
 export const drivers = [
   { name: "Lev Cassian",   driverIndex: 9.0, cost: 15_000_000 },
   { name: "Mira Solande",  driverIndex: 6.5, cost:  8_000_000 },
@@ -62,6 +65,7 @@ export const crisisEvent = {
   ],
 };
 
+// Пример итога сезона для тестирования экрана FinalSeasonResult.
 export const seasonResult = {
   outcome: "survived" as "survived" | "bankrupt",
   summary:

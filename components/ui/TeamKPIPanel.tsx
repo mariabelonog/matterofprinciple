@@ -1,13 +1,18 @@
 "use client";
 
+// TeamKPIPanel — панель финансовых KPI команды, раскрывается по клику.
+// Вычисляет показатели через calcTeamKPIs и отображает их секциями:
+// прибыльность, трек-перформанс, риски и эффективность капитала.
+
 import { useState } from "react";
 import type { ExtendedRaceResult, Driver } from "@/types/game";
 import { calcTeamKPIs } from "@/lib/teamKPIs";
 
+// Пропсы панели KPI команды.
 interface Props {
-  raceHistory: ExtendedRaceResult[];
-  currentBudget: number;
-  driver: Driver | null;
+  raceHistory: ExtendedRaceResult[]; // история гонок для расчёта всех показателей
+  currentBudget: number;             // текущий бюджет для расчёта ROI и runway
+  driver: Driver | null;             // выбранный пилот (null = ещё не выбран)
 }
 
 // ─── Tooltip (explanation) ────────────────────────────────────────────────────
@@ -58,6 +63,7 @@ const EXPLANATIONS: Record<string, string> = {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
+// KPIRow — строка одного показателя с раскрывающимся пояснением из EXPLANATIONS.
 function KPIRow({
   label,
   value,
@@ -65,13 +71,13 @@ function KPIRow({
   sub,
   valueColor,
 }: {
-  label: string;
-  value: string;
-  id: string;
-  sub?: string;
-  valueColor?: string;
+  label: string;      // название метрики
+  value: string;      // форматированное значение (строка, уже с единицами)
+  id: string;         // ключ в EXPLANATIONS для текста подсказки
+  sub?: string;       // дополнительная подпись под названием (опционально)
+  valueColor?: string; // цвет значения; по умолчанию белый
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // раскрыто ли пояснение
 
   return (
     <div>
@@ -109,20 +115,22 @@ function KPIRow({
   );
 }
 
+// RevenueBar — горизонтальный стек-бар распределения доходов:
+// зелёный — призовые, коричневый — спонсор, красный — потери от аварий.
 function RevenueBar({
   prize,
   sponsor,
   crash,
 }: {
-  prize: number;
-  sponsor: number;
-  crash: number;
+  prize: number;   // суммарные призовые за все гонки
+  sponsor: number; // суммарный спонсорский доход
+  crash: number;   // суммарные потери от аварий
 }) {
-  const total = prize + sponsor;
+  const total = prize + sponsor; // база для нормализации ширины сегментов
   if (total === 0) return null;
-  const prizePct   = (prize / total) * 100;
-  const sponsorPct = (sponsor / total) * 100;
-  const lossPct    = Math.min(100, (crash / total) * 100);
+  const prizePct   = (prize / total) * 100;           // % ширины зелёного сегмента
+  const sponsorPct = (sponsor / total) * 100;         // % ширины коричневого сегмента
+  const lossPct    = Math.min(100, (crash / total) * 100); // % потерь от дохода, максимум 100
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -156,15 +164,18 @@ function RevenueBar({
 // ─── Main panel ───────────────────────────────────────────────────────────────
 
 export default function TeamKPIPanel({ raceHistory, currentBudget, driver }: Props) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false); // развёрнута ли панель с деталями
 
+  // Не рендерим панель пока не завершена хотя бы одна гонка
   if (raceHistory.length === 0) return null;
 
-  const kpi = calcTeamKPIs(raceHistory, currentBudget, driver);
+  const kpi = calcTeamKPIs(raceHistory, currentBudget, driver); // рассчитываем все KPI
 
+  // Цвет ROI: зелёный >10%, жёлтый >0%, красный — убыток
   const roiColor =
     kpi.roi > 10 ? "#22c55e" : kpi.roi > 0 ? "#f59e0b" : "#dc2626";
 
+  // Метки и цвета для тренда позиций
   const trendLabel = {
     improving:        "↑ IMPROVING",
     declining:        "↓ DECLINING",

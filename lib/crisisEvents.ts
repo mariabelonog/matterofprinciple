@@ -1,5 +1,10 @@
+// crisisEvents.ts — Данные трёх кризисных событий (Страсбург, Будапешт, Стамбул).
+// Каждое событие привязано к городу и предлагает 3 варианта с разными компромиссами.
+// Ключи словаря совпадают с полем city в Race — это используется для поиска в RaceScreen.
+
 import type { CrisisEvent } from "@/types/game";
 
+// Словарь кризисных событий, индексированный по названию города.
 export const CRISIS_EVENTS: Record<string, CrisisEvent> = {
   Strassburg: {
     city: "Strassburg",
@@ -11,11 +16,11 @@ export const CRISIS_EVENTS: Record<string, CrisisEvent> = {
         id: "run_it",
         label: "Run the fuel",
         description: "Pump it in. The car will fly — unless the stewards come knocking.",
-        carDevelopmentDelta: 3,
-        budgetDelta: -8_000_000,
-        publicImageDelta: -2,
-        riskModifier: 3,
-        crashLossMultiplier: 2,
+        carDevelopmentDelta: 3,          // нелегальное топливо даёт +3 к car development
+        budgetDelta: -8_000_000,         // стоимость нелегального топлива — 8M G
+        publicImageDelta: -2,            // репутационный риск скандала
+        riskModifier: 3,                 // риск гонки увеличивается: вероятность проверки
+        crashLossMultiplier: 2,          // при аварии потери удваиваются (машина разрушена)
         narrative:
           "The car screams down the straight. The stewards are watching. Every lap could be your last clean one.",
       },
