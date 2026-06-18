@@ -40,6 +40,9 @@ Next.js 15 (App Router), TypeScript 5, Tailwind CSS v4. Игра полност�
 
 ```
 Более подробно:
+
+
+```
 matterofprinciple/
 │
 ├── app/
