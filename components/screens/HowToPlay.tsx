@@ -13,7 +13,7 @@ const steps = [
   {
     num: "01",
     title: "NAME YOUR TEAM & PICK A DRIVER",
-    body: "You start with 100M G (Geld). First, name your team. Then choose one of three drivers — each has a skill index (0–10) and a cost deducted immediately from your budget.",
+    body: "You start with 100M G (Geld — local currency). First, name your team. Then choose one of three drivers — each has a skill index (0–10) and a cost deducted immediately from your budget.",
   },
   {
     num: "02",
@@ -23,7 +23,7 @@ const steps = [
   {
     num: "03",
     title: "SET YOUR RISK WILLINGNESS",
-    body: "High risk high reward is our slogan. Risk is an integral part of racing, you have to decide weather you wanna go all in.",
+    body: "High risk high reward is our slogan. Risk is an integral part of racing, you have to decide whether you wanna go all in.",
   },
   {
     num: "04",
@@ -32,16 +32,26 @@ const steps = [
   },
   {
     num: "05",
-    title: "MANAGE CRASHES & SPONSORS",
-    body: "You constantly need money not only to develop the car and pay for the staff but also because more often then not incidents on track happen.",
+    title: "COMPETE & COLLECT PRIZE MONEY",
+    body: "You race against 9 rival teams. Finishing position determines your prize money — 1st place pays 50M G, 10th pays 1M G. Rivals develop their cars between races, so staying ahead gets harder.",
   },
   {
     num: "06",
+    title: "MANAGE CRASHES & SPONSORS",
+    body: "High risk means crash losses subtracted from your budget after each race. Obviously, public image explicitly affects sponsorships — the higher it is, the more likely you are to land a contract that race.",
+  },
+  {
+    num: "07",
+    title: "BE IN TOUCH WITH THE DATA",
+    body: "Learn a little about each city following the route of the famous Orient Express and keep track of your team's KPIs!",
+  },
+  {
+    num: "08",
     title: "SURVIVE CRISIS EVENTS",
     body: "Some races will hit you with a crisis event and three hard choices. Each choice shifts your budget, indices, or risk — applied before that race's calculation. There is no safe pick.",
   },
   {
-    num: "07",
+    num: "09",
     title: "SURVIVE THE SEASON",
     body: "Reach Istanbul without going bankrupt. Your final score is based on average race position, remaining budget, and public image. Survival is the win — your ranking is the legacy.",
   },
