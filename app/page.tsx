@@ -235,6 +235,8 @@ export default function Home() {
             currentCarDev={gameState.carDevelopment}
             currentStaff={gameState.staffQuality}
             currentImage={gameState.publicImage}
+            raceHistory={gameState.raceHistory}
+            driver={gameState.driver}
             onConfirm={handleInvestmentConfirm}
           />
         )}
