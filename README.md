@@ -1,5 +1,7 @@
 # Matter of Principle
 
+[Посмотреть рекламную брошюру](https://mariabelonog.github.io/matterofprinciple/brochure.html)
+
 **[▶ Играть](https://matterofprinciple.vercel.app)**
 
 Браузерная стратегическая игра: ты руководитель гоночной команды на грани банкротства. Один сезон, восемь гонок, сто миллионов Geld на старте.
