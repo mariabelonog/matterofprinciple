@@ -8,16 +8,15 @@
 
 ## Для пользователя
 
-<img width="1425" height="729" alt="Screenshot 2026-06-18 at 14 08 49" src="https://github.com/user-attachments/assets/d73648cf-ad86-4e83-883e-f9b4ead9437a" />
-<img width="1425" height="723" alt="Screenshot 2026-06-18 at 13 59 02" src="https://github.com/user-attachments/assets/645c27a3-e137-4451-9466-4c2e6f65dabc" />
 <img width="1428" height="736" alt="Screenshot 2026-06-18 at 13 58 05" src="https://github.com/user-attachments/assets/6c70ffa3-17ea-496a-9c6f-b6facff17937" />
-
+<img width="1425" height="723" alt="Screenshot 2026-06-18 at 13 59 02" src="https://github.com/user-attachments/assets/645c27a3-e137-4451-9466-4c2e6f65dabc" />
+<img width="1425" height="729" alt="Screenshot 2026-06-18 at 14 08 49" src="https://github.com/user-attachments/assets/d73648cf-ad86-4e83-883e-f9b4ead9437a" />
 
 ## Для разработчика
 
 ### Стек
 
-Next.js 15 (App Router), TypeScript 5, Tailwind CSS v4. Без бэкенда, без базы данных, без авторизации — игра полностью работает в браузере.
+Next.js 15 (App Router), TypeScript 5, Tailwind CSS v4. Игра полностью работает в браузере.
 
 ### Структура проекта
 
